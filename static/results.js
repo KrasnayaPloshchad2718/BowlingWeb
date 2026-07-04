@@ -18,27 +18,27 @@ const H = canvas.height;
 // URLからデータ取得
 //=====================================
 
-const parts = window.location.pathname.split("/");
-const resultId = parts[parts.length - 1];
-
-let resultData = null;
 
 
 //=====================================
 // 読み込み
 //=====================================
 
-window.addEventListener(
-    "DOMContentLoaded",
-    async () => {
+//=====================================
+// 読み込み
+//=====================================
 
-        await loadResult();
+window.addEventListener(
+
+    "DOMContentLoaded",
+
+    ()=>{
 
         drawImage();
 
     }
-);
 
+);
 
 //=====================================
 // サーバー取得
@@ -284,6 +284,10 @@ function drawPin(x,y,s){
 // 文字描画
 //=====================================
 
+//=====================================
+// 文字描画
+//=====================================
+
 function drawTexts(){
 
     // タイトル
@@ -316,56 +320,93 @@ function drawTexts(){
     ctx.lineTo(860,360);
     ctx.stroke();
 
-    // レーン表示
+    // レーン
     ctx.fillStyle="#222";
     ctx.font="bold 56px Arial";
 
     ctx.fillText(
         "LANE",
         W/2,
-        470
+        450
     );
 
     ctx.fillStyle="#b00000";
-    ctx.font="bold 130px Arial";
+    ctx.font="bold 120px Arial";
 
     ctx.fillText(
-        String(resultData.team),
+        String(resultData.lane),
         W/2,
-        590
+        560
     );
 
-    // SCORE
+    // 合計
     ctx.fillStyle="#222";
-    ctx.font="bold 56px Arial";
+    ctx.font="bold 52px Arial";
 
     ctx.fillText(
-        "SCORE",
+        "TOTAL SCORE",
         W/2,
-        710
+        660
     );
 
     ctx.fillStyle="#c00000";
-    ctx.font="bold 150px Arial";
+    ctx.font="bold 120px Arial";
 
     ctx.fillText(
         String(resultData.score),
         W/2,
-        855
+        760
     );
 
-    // フッター
-    ctx.fillStyle="#555";
-    ctx.font="28px Arial";
+    // お題
+    ctx.textAlign="left";
+
+    ctx.fillStyle="#111";
+    ctx.font="bold 34px Arial";
 
     ctx.fillText(
-        "Bowling Challenge",
-        W/2,
-        980
+        resultData.odai[0],
+        170,
+        860
+    );
+
+    ctx.fillText(
+        resultData.odai[1],
+        170,
+        910
+    );
+
+    ctx.fillText(
+        resultData.odai[2],
+        170,
+        960
+    );
+
+    // 得点
+    ctx.textAlign="right";
+
+    ctx.fillStyle="#b00000";
+    ctx.font="bold 34px Arial";
+
+    ctx.fillText(
+        resultData.scores[0],
+        910,
+        860
+    );
+
+    ctx.fillText(
+        resultData.scores[1],
+        910,
+        910
+    );
+
+    ctx.fillText(
+        resultData.scores[2],
+        910,
+        960
     );
 
 }
-
 
 //=====================================
 // 角丸四角形
