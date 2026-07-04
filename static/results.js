@@ -208,6 +208,39 @@ function drawOdai() {
 // ピン単体・強視認・最終統合
 //=====================================
 
+function drawSimplePin(x, y) {
+
+    ctx.save();
+
+    // 影（軽く）
+    ctx.shadowColor = "rgba(0,0,0,0.5)";
+    ctx.shadowBlur = 8;
+
+    // 本体（普通のピン形状）
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 3;
+
+    // 体（細長い楕円ベース）
+    ctx.beginPath();
+    ctx.ellipse(x + 20, y + 60, 18, 55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // 赤ライン（1本だけ）
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#cc0000";
+    ctx.fillRect(x + 5, y + 55, 30, 10);
+
+    // 頭
+    ctx.beginPath();
+    ctx.arc(x + 20, y + 10, 18, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.restore();
+}
 
 //=========================
 // ピン（単体強化モデル）
@@ -247,33 +280,39 @@ function drawPin(x, y) {
 // 並び（見せる配置ではなく“実物配置”）
 //=========================
 
-function drawPins() {
+function drawSimplePin(x, y) {
 
-    const baseX = W / 2 - 120;
-    const baseY = 880;
+    ctx.save();
 
-    const dx = 75;
-    const dy = 95;
+    // 影（軽く）
+    ctx.shadowColor = "rgba(0,0,0,0.5)";
+    ctx.shadowBlur = 8;
 
-    // 1
-    drawPin(baseX + dx * 1.5, baseY);
+    // 本体（普通のピン形状）
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 3;
 
-    // 2
-    drawPin(baseX + dx * 1, baseY + dy);
-    drawPin(baseX + dx * 2, baseY + dy);
+    // 体（細長い楕円ベース）
+    ctx.beginPath();
+    ctx.ellipse(x + 20, y + 60, 18, 55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
 
-    // 3
-    drawPin(baseX + dx * 0.5, baseY + dy * 2);
-    drawPin(baseX + dx * 1.5, baseY + dy * 2);
-    drawPin(baseX + dx * 2.5, baseY + dy * 2);
+    // 赤ライン（1本だけ）
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#cc0000";
+    ctx.fillRect(x + 5, y + 55, 30, 10);
 
-    // 4
-    drawPin(baseX, baseY + dy * 3);
-    drawPin(baseX + dx, baseY + dy * 3);
-    drawPin(baseX + dx * 2, baseY + dy * 3);
-    drawPin(baseX + dx * 3, baseY + dy * 3);
+    // 頭
+    ctx.beginPath();
+    ctx.arc(x + 20, y + 10, 18, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.restore();
 }
-
 
 //=========================
 // 丸角矩形（補助関数）
