@@ -215,45 +215,33 @@ function drawOdai() {
 
 function drawPin(x, y) {
 
-    //=========================
-    // 影（背景から分離）
-    //=========================
+    ctx.save(); // ← 超重要（状態隔離）
 
-    ctx.shadowColor = "rgba(0,0,0,0.8)";
-    ctx.shadowBlur = 15;
-
-    //=========================
-    // 本体（白＋厚み）
-    //=========================
+    // 影はピンだけ
+    ctx.shadowColor = "rgba(0,0,0,0.6)";
+    ctx.shadowBlur = 10;
 
     ctx.fillStyle = "#f8f5ee";
-    ctx.strokeStyle = "#000000";
-    ctx.lineWidth = 5;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 4;
 
     roundRect(x, y, 55, 130, 14, true, true);
 
-    //=========================
-    // 赤リング（視認性強化）
-    //=========================
-
+    // shadow解除（ここ重要）
     ctx.shadowBlur = 0;
-    ctx.fillStyle = "#d40000";
 
+    ctx.fillStyle = "#d40000";
     ctx.fillRect(x, y + 35, 55, 14);
     ctx.fillRect(x, y + 62, 55, 14);
 
-    //=========================
-    // 頭（球体強調）
-    //=========================
-
     ctx.beginPath();
     ctx.arc(x + 27, y - 8, 22, 0, Math.PI * 2);
-
     ctx.fillStyle = "#f8f5ee";
     ctx.fill();
     ctx.stroke();
-}
 
+    ctx.restore(); // ← 絶対必要
+}
 
 //=========================
 // 並び（見せる配置ではなく“実物配置”）
