@@ -391,25 +391,30 @@ function sendResult(total) {
     .then(res => res.json())
     .then(data => {
 
-    console.log("create_result:", data);
+        console.log("create_result:", data);
 
-    if (!data.url) {
-        alert("サーバーからURLが返ってきません");
-        return;
-    }
+        if (!data.url) {
+            alert("サーバーからURLが返ってきません");
+            return;
+        }
 
-    const url = window.location.origin + data.url;
+        const url = window.location.origin + data.url;
 
-    console.log(url);
+        console.log(url);
 
-    const qr = document.getElementById("qr");
-    qr.innerHTML = "";
+        const qr = document.getElementById("qr");
+        qr.innerHTML = "";
 
-    new QRCode(qr, {
-        text: url,
-        width: 180,
-        height: 180
+        new QRCode(qr, {
+            text: url,
+            width: 180,
+            height: 180
+        });
+
+        alert("結果URL生成:\n" + url);
+    })
+    .catch(err => {
+        console.error(err);
+        alert("QR生成に失敗しました。");
     });
 }
-    alert("結果URL生成:\n" + url);
-});
