@@ -1,0 +1,104 @@
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background: #111;
+    color: white;
+    text-align: center;
+}
+
+/* 背景 */
+.background {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, #5a0000, #111);
+    z-index: -1;
+}
+
+/* ヘッダー */
+header {
+    padding: 20px;
+}
+
+h1 {
+    color: #ffd166;
+    letter-spacing: 3px;
+}
+
+.subtitle {
+    color: #aaa;
+}
+
+/* カード */
+.card {
+    max-width: 500px;
+    margin: auto;
+    background: #222;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+}
+
+/* スコア */
+.score-box {
+    margin-bottom: 20px;
+}
+
+.info {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    font-size: 20px;
+    border-bottom: 1px solid #444;
+}
+
+.value {
+    font-size: 28px;
+    color: #ffd166;
+    font-weight: bold;
+}
+
+/* 共有 */
+.share {
+    margin-top: 20px;
+}
+
+button {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #b40000;
+    color: white;
+}
+
+button:hover {
+    background: #ff1a1a;
+}
+
+a {
+    display: block;
+    margin-top: 10px;
+    color: #00d4ff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* QR */
+#qr {
+    margin-top: 20px;
+}
+
+/* フッター */
+footer {
+    margin-top: 30px;
+    font-size: 12px;
+    color: #666;
+}
