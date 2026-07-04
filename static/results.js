@@ -1,673 +1,329 @@
-// =====================================
-// Results.js
-// American Diner Style
-// Part 1
-// =====================================
-
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-canvas.width = 1080;
-canvas.height = 1080;
-
-const W = canvas.width;
-const H = canvas.height;
-
-
 //=====================================
-// URLからデータ取得
+// results.js 1/3
+// 基礎・Canvas初期化・データ取得
 //=====================================
 
 
+//=========================
+// グローバル
+//=========================
 
-//=====================================
-// 読み込み
-//=====================================
+let canvas;
+let ctx;
 
-//=====================================
-// 読み込み
-//=====================================
+let W = 1080;
+let H = 1350;
 
-window.addEventListener(
+let resultData = null;
 
-    "DOMContentLoaded",
 
-    ()=>{
+//=========================
+// 初期化
+//=========================
 
-        drawImage();
+window.addEventListener("DOMContentLoaded", () => {
 
+    canvas = document.getElementById("canvas");
+    ctx = canvas.getContext("2d");
+
+    //=========================
+    // 高解像度対応（重要）
+    //=========================
+
+    const dpr = window.devicePixelRatio || 2;
+
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+
+    ctx.scale(dpr, dpr);
+
+    //=========================
+    // URLからデータ取得
+    //=========================
+
+    resultData = parseURL();
+
+    if (!resultData) {
+        console.error("resultData is null");
+        return;
     }
 
-);
+    render();
+});
 
-//=====================================
-// サーバー取得
-//=====================================
 
-async function loadResult(){
+//=========================
+// URLパース
+//=========================
 
-    try{
+function parseURL() {
 
-        const res =
-            await fetch(
-                "/api/results/" + resultId
-            );
+    const params = new URLSearchParams(window.location.search);
 
-        if(!res.ok){
+    const lane = params.get("lane");
+    const score = params.get("score");
 
-            throw new Error();
+    const oa = params.get("oa");
+    const ob = params.get("ob");
+    const oc = params.get("oc");
 
-        }
+    const sa = params.get("sa");
+    const sb = params.get("sb");
+    const sc = params.get("sc");
 
-        resultData =
-            await res.json();
-
+    if (!lane || !score) {
+        return null;
     }
 
-    catch(e){
-
-        alert("結果が取得できません");
-
-    }
-
+    return {
+        lane: lane,
+        score: score,
+        odai: [oa, ob, oc],
+        scores: [sa, sb, sc]
+    };
 }
 
 
-//=====================================
-// 全体描画
-//=====================================
+//=========================
+// メイン描画
+//=========================
 
-function drawImage(){
-
-    if(!resultData)return;
+function render() {
 
     drawBackground();
 
-    drawChecker();
+    drawNeonTitle();
 
-    drawCard();
+    drawScoreBlock();
+
+    drawOdaiBlock();
 
     drawPins();
 
-    drawTexts();
-
 }
 
-
 //=====================================
-// 背景
+// results.js 2/3
+// ネオンタイトル・スコア・お題表示
 //=====================================
 
-function drawBackground(){
 
-    const g =
-        ctx.createLinearGradient(
-            0,
-            0,
-            0,
-            H
-        );
+//=========================
+// 背景（簡易ダイナー風）
+//=========================
 
-    g.addColorStop(
-        0,
-        "#6f0000"
-    );
+function drawBackground() {
 
-    g.addColorStop(
-        1,
-        "#2a0000"
-    );
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+
+    g.addColorStop(0, "#1a0000");
+    g.addColorStop(0.5, "#0f0f0f");
+    g.addColorStop(1, "#000000");
 
     ctx.fillStyle = g;
-
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        H
-    );
-
+    ctx.fillRect(0, 0, W, H);
 }
 
 
-//=====================================
-// チェッカーフラッグ
-//=====================================
+//=========================
+// ネオンタイトル
+//=========================
 
-function drawChecker(){
+function drawNeonTitle() {
 
-    const size = 40;
+    const x = W / 2;
+    const y = 140;
 
-    for(
-        let y=0;
-        y<120;
-        y+=size
-    ){
+    ctx.textAlign = "center";
+    ctx.font = "bold 72px Arial";
 
-        for(
-            let x=0;
-            x<W;
-            x+=size
-        ){
+    // グロー（外側）
+    ctx.shadowColor = "#ff0040";
+    ctx.shadowBlur = 30;
 
-            const white =
-                (
-                    x/size+
-                    y/size
-                )%2===0;
+    ctx.fillStyle = "#ff2a6d";
+    ctx.fillText("BOWLING RESULT", x, y);
 
-            ctx.fillStyle=
-                white
-                ?"#ffffff"
-                :"#111111";
+    // コア（内側）
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("BOWLING RESULT", x, y);
 
-            ctx.fillRect(
-                x,
-                y,
-                size,
-                size
-            );
-
-        }
-
-    }
-
+    // サブタイトル
+    ctx.fillStyle = "#aaaaaa";
+    ctx.font = "22px Arial";
+    ctx.fillText("American Diner Challenge", x, y + 40);
 }
 
 
-//=====================================
-// メインカード
-//=====================================
+//=========================
+// スコアブロック
+//=========================
 
-function drawCard(){
+function drawScoreBlock() {
 
-    ctx.fillStyle="#ffffff";
+    const x = W / 2;
 
-    roundRect(
-        120,
-        170,
-        840,
-        760,
-        30
-    );
-
-    ctx.fill();
-
-    ctx.lineWidth=8;
-
-    ctx.strokeStyle="#b40000";
-
-    ctx.stroke();
-
-}
-
-
-//=====================================
-// ピン描画
-//=====================================
-
-function drawPins(){
-
-    const baseX = 200;
-    const baseY = 900;
-
-    const rows = [1,2,3,4];
-
-    let yOffset = 0;
-
-    for(let i=0;i<rows.length;i++){
-
-        let count = rows[i];
-        let xOffset = (4 - count) * 25;
-
-        for(let j=0;j<count;j++){
-
-            // 🔥 白禁止 → 赤ベース＋黒縁
-            ctx.beginPath();
-
-            ctx.arc(
-                baseX + xOffset + j * 55,
-                baseY + yOffset,
-                16,
-                0,
-                Math.PI * 2
-            );
-
-            // 塗り（赤）
-            ctx.fillStyle = "#c00000";
-            ctx.fill();
-
-            // 縁（黒でくっきり）
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 4;
-            ctx.stroke();
-
-        }
-
-        yOffset += 55;
-    }
-}
-
-//=====================================
-// ピン
-//=====================================
-
-function drawPin(x,y,s){
-
-    ctx.save();
-
-    ctx.translate(x,y);
-
-    ctx.scale(s,s);
-
-    ctx.fillStyle="#ffffff";
-
-    ctx.beginPath();
-
-    ctx.moveTo(0,-110);
-
-    ctx.bezierCurveTo(
-
-        -25,
-        -50,
-
-        -45,
-        20,
-
-        -30,
-        120
-
-    );
-
-    ctx.lineTo(
-        30,
-        120
-    );
-
-    ctx.bezierCurveTo(
-
-        45,
-        20,
-
-        25,
-        -50,
-
-        0,
-        -110
-
-    );
-
-    ctx.fill();
-
-    ctx.fillStyle="#d00000";
-
-    ctx.fillRect(
-
-        -25,
-        -30,
-        50,
-        18
-
-    );
-
-    ctx.restore();
-
-}
-//=====================================
-// 文字描画
-//=====================================
-
-//=====================================
-// 文字描画
-//=====================================
-//=====================================
-// 文字・ピン・レイアウト改善版
-//=====================================
-//=====================================
-// レイアウト完全修正版
-//=====================================
-
-function drawTexts(){
-
-    //=========================
-    // タイトル（上・強め）
-    //=========================
-
-    ctx.fillStyle = "#8b0000";
-    ctx.font = "bold 64px Arial";
     ctx.textAlign = "center";
 
-    ctx.fillText(
-        "BOWLING RESULT",
-        W / 2,
-        120
-    );
-
-    ctx.fillStyle = "#333";
-    ctx.font = "22px Arial";
-
-    ctx.fillText(
-        "American Diner Challenge",
-        W / 2,
-        160
-    );
-
-    //=========================
-    // LANE（小さく・控えめ）
-    //=========================
-
+    // LANE（小さく）
     ctx.fillStyle = "#666";
     ctx.font = "20px Arial";
-
-    ctx.fillText("LANE", W / 2, 210);
+    ctx.fillText("LANE", x, 220);
 
     ctx.fillStyle = "#b00000";
-    ctx.font = "bold 60px Arial";
+    ctx.font = "bold 64px Arial";
+    ctx.fillText(resultData.lane, x, 290);
 
-    ctx.fillText(
-        String(resultData.lane),
-        W / 2,
-        280
-    );
-
-    //=========================
-    // SCORE（少し上へ）
-    //=========================
-
+    // SCORE
     ctx.fillStyle = "#111";
-    ctx.font = "24px Arial";
-
-    ctx.fillText("TOTAL SCORE", W / 2, 340);
+    ctx.font = "22px Arial";
+    ctx.fillText("TOTAL SCORE", x, 360);
 
     ctx.fillStyle = "#d00000";
-    ctx.font = "bold 80px Arial";
+    ctx.font = "bold 90px Arial";
+    ctx.fillText(resultData.score, x, 460);
+}
 
-    ctx.fillText(
-        String(resultData.score),
-        W / 2,
-        430
-    );
 
-    //=========================
-    // お題エリア（さらに下げて分離）
-    //=========================
+//=========================
+// お題ブロック
+//=========================
 
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
-    ctx.fillRect(60, 500, 980, 320);
+function drawOdaiBlock() {
+
+    ctx.fillStyle = "rgba(0,0,0,0.55)";
+    ctx.fillRect(60, 520, 960, 300);
 
     ctx.textAlign = "left";
 
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 26px Arial";
+    // タイトル
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 28px Arial";
+    ctx.fillText("ODAI", 100, 570);
 
-    ctx.fillText("ODAI", 100, 550);
-
+    // お題
     ctx.font = "24px Arial";
+    ctx.fillStyle = "#ffffff";
 
-    ctx.fillText(resultData.odai[0], 100, 610);
-    ctx.fillText(resultData.odai[1], 100, 660);
-    ctx.fillText(resultData.odai[2], 100, 710);
+    ctx.fillText(resultData.odai[0] || "", 100, 630);
+    ctx.fillText(resultData.odai[1] || "", 100, 680);
+    ctx.fillText(resultData.odai[2] || "", 100, 730);
 
-    //=========================
-    // スコア（右側・強調）
-    //=========================
-
+    // スコア右側
     ctx.textAlign = "right";
-
     ctx.fillStyle = "#ffd700";
-    ctx.font = "bold 26px Arial";
 
-    ctx.fillText(resultData.scores[0], 1000, 610);
-    ctx.fillText(resultData.scores[1], 1000, 660);
-    ctx.fillText(resultData.scores[2], 1000, 710);
-
-    //=========================
-    // ピン（白禁止・強コントラスト）
-    //=========================
-
-    drawPins();
+    ctx.fillText(resultData.scores[0] || "", 980, 630);
+    ctx.fillText(resultData.scores[1] || "", 980, 680);
+    ctx.fillText(resultData.scores[2] || "", 980, 730);
 }
 
 //=====================================
-// 角丸四角形
+// results.js 3/3
+// ピン描画・仕上げ・統合
 //=====================================
 
-function roundRect(x,y,w,h,r){
+
+//=========================
+// ピン描画（強化版）
+//=========================
+
+function drawPin(x, y) {
+
+    // 外枠（黒縁強化）
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 6;
+
+    // 本体
+    ctx.fillStyle = "#f2efe6";
 
     ctx.beginPath();
+    ctx.roundRect(x, y, 50, 120, 12);
+    ctx.fill();
+    ctx.stroke();
 
-    ctx.moveTo(x+r,y);
+    // 赤ライン（コントラスト強化）
+    ctx.fillStyle = "#d40000";
 
-    ctx.lineTo(x+w-r,y);
+    ctx.fillRect(x, y + 30, 50, 14);
+    ctx.fillRect(x, y + 55, 50, 14);
 
-    ctx.quadraticCurveTo(
-        x+w,
-        y,
-        x+w,
-        y+r
-    );
+    // 頭（球）
+    ctx.beginPath();
+    ctx.arc(x + 25, y - 5, 20, 0, Math.PI * 2);
 
-    ctx.lineTo(
-        x+w,
-        y+h-r
-    );
-
-    ctx.quadraticCurveTo(
-        x+w,
-        y+h,
-        x+w-r,
-        y+h
-    );
-
-    ctx.lineTo(
-        x+r,
-        y+h
-    );
-
-    ctx.quadraticCurveTo(
-        x,
-        y+h,
-        x,
-        y+h-r
-    );
-
-    ctx.lineTo(
-        x,
-        y+r
-    );
-
-    ctx.quadraticCurveTo(
-        x,
-        y,
-        x+r,
-        y
-    );
-
-    ctx.closePath();
-
-}
-
-//=====================================
-// PNGダウンロード
-//=====================================
-
-function downloadImage(){
-
-    const link =
-        document.createElement("a");
-
-    link.download =
-        "BowlingResult.png";
-
-    link.href =
-        canvas.toDataURL("image/png");
-
-    link.click();
-
+    ctx.fillStyle = "#f2efe6";
+    ctx.fill();
+    ctx.stroke();
 }
 
 
-//=====================================
-// 共有
-//=====================================
+//=========================
+// ピン配置（視認性重視）
+//=========================
 
-async function share(){
+function drawPins() {
 
-    canvas.toBlob(
+    const baseX = 420;
+    const baseY = 900;
 
-        async(blob)=>{
+    const dx = 70;
+    const dy = 85;
 
-            if(!blob){
+    // 1段目
+    drawPin(baseX + dx * 1.5, baseY);
 
-                alert("画像生成失敗");
+    // 2段目
+    drawPin(baseX + dx * 1, baseY + dy);
+    drawPin(baseX + dx * 2, baseY + dy);
 
-                return;
+    // 3段目
+    drawPin(baseX + dx * 0.5, baseY + dy * 2);
+    drawPin(baseX + dx * 1.5, baseY + dy * 2);
+    drawPin(baseX + dx * 2.5, baseY + dy * 2);
 
-            }
-
-            const file =
-                new File(
-
-                    [blob],
-
-                    "BowlingResult.png",
-
-                    {
-                        type:"image/png"
-                    }
-
-                );
-
-            if(
-
-                navigator.canShare &&
-
-                navigator.canShare({
-
-                    files:[file]
-
-                })
-
-            ){
-
-                try{
-
-                    await navigator.share({
-
-                        files:[file],
-
-                        title:
-                        "Bowling Challenge",
-
-                        text:
-                        "Bowling Challenge"
-
-                    });
-
-                }
-
-                catch(e){
-
-                    console.log(e);
-
-                }
-
-            }
-
-            else{
-
-                downloadImage();
-
-            }
-
-        },
-
-        "image/png"
-
-    );
-
+    // 4段目
+    drawPin(baseX, baseY + dy * 3);
+    drawPin(baseX + dx, baseY + dy * 3);
+    drawPin(baseX + dx * 2, baseY + dy * 3);
+    drawPin(baseX + dx * 3, baseY + dy * 3);
 }
 
 
-//=====================================
-// ボタン登録
-//=====================================
+//=========================
+// フッター装飾
+//=========================
 
-window.addEventListener(
+function drawFooter() {
 
-    "DOMContentLoaded",
+    ctx.textAlign = "center";
 
-    ()=>{
+    ctx.fillStyle = "#444";
+    ctx.font = "18px Arial";
 
-        const shareButton=
-            document.getElementById(
-                "shareButton"
-            );
-
-        if(shareButton){
-
-            shareButton.addEventListener(
-
-                "click",
-
-                share
-
-            );
-
-        }
-
-        const saveButton=
-            document.getElementById(
-                "saveButton"
-            );
-
-        if(saveButton){
-
-            saveButton.addEventListener(
-
-                "click",
-
-                downloadImage
-
-            );
-
-        }
-
-    }
-
-);
+    ctx.fillText("American Diner Bowling System", W / 2, H - 40);
+}
 
 
-//=====================================
-// リサイズ対応
-//=====================================
+//=========================
+// 最終統合
+//=========================
 
-window.addEventListener(
+function render() {
 
-    "resize",
+    drawBackground();
 
-    ()=>{
+    drawNeonTitle();
 
-        if(resultData){
+    drawScoreBlock();
 
-            drawImage();
+    drawOdaiBlock();
 
-        }
+    drawPins();
 
-    }
-
-);
-
-
-//=====================================
-// デバッグ
-//=====================================
-
-console.log(
-    "Results.js Loaded"
-);
-
-console.log(
-    "Result ID:",
-    resultId
-);
+    drawFooter();
+}
