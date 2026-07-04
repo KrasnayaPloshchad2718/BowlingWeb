@@ -1,5 +1,6 @@
 from flask import url_for,Flask, session,jsonify, request, redirect, render_template, Response
 import os
+import uuid
 
 results = load_results()
 
