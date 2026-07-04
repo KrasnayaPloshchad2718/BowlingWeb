@@ -116,7 +116,7 @@ function drawTitle() {
 
     ctx.textAlign = "center";
 
-    const text = "BOWLING RESULT";
+    const text = "Zeze1-2お題deボウリング　RESULT";
 
     // ===== 外側グロー（強） =====
     ctx.font = "bold 80px Arial";
