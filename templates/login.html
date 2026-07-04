@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>管理ページにログイン</title>
+
+    <link rel="stylesheet"
+          href="/static/login.css">
+
+</head>
+
+<body>
+
+    <!-- 背景装飾 -->
+
+    <div class="background-grid"></div>
+
+    <div class="pin left">🎳</div>
+
+    <div class="pin right">🎳</div>
+
+    <!-- ===================== -->
+    <!-- タイトル -->
+    <!-- ===================== -->
+
+    <header>
+
+        <h1 id="title">
+
+            Zeze1-2お題deボウリング
+
+        </h1>
+
+        <p class="subtitle">
+
+            ★ American Diner Login ★
+
+        </p>
+
+    </header>
+
+    <nav class="display-nav">
+        <a href="/" class="active">抽選</a>
+        <a href="/display"> スコア</a>
+        <a href="/rules">ルール</a>
+    </nav>
+    <!-- ===================== -->
+    <!-- ログインカード -->
+    <!-- ===================== -->
+
+    <main>
+
+        <div class="login-card">
+
+            <h2>
+
+                LOGIN
+
+            </h2>
+
+            <p class="message">
+
+                このページでは、お題の抽選や得点の計算などを行っています。<br>ゲームの進行を妨げないように保護をかけています。
+
+            </p>
+
+            <form
+                action="/login"
+                method="post"
+                id="loginForm"
+            >
+
+                <div class="input-area">
+
+                    <label>
+
+                        USER NAME
+
+                    </label>
+
+                    <input
+                        type="text"
+                        name="username"
+                        id="username"
+                        autocomplete="username"
+                        required
+                    >
+
+                </div>
+
+                <div class="input-area">
+
+                    <label>
+
+                        PASSWORD
+
+                    </label>
+
+                    <input
+                        type="password"
+                        name="password"
+                        id="password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                </div>
+
+                <div class="show-password">
+
+                    <label>
+
+                        <input
+                            type="checkbox"
+                            id="showPassword"
+                        >
+
+                        パスワードを表示
+
+                    </label>
+
+                </div>
+
+                <button
+                    type="submit"
+                    id="loginButton"
+                >
+
+                    LOGIN
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </main>
+
+    <!-- ===================== -->
+    <!-- フッター -->
+    <!-- ===================== -->
+
+    <footer>
+
+        <div id="clock">
+
+            00:00:00
+
+        </div>
+
+        <p>
+
+            Zeze1-2お題deボウリング
+
+        </p>
+
+    </footer>
+
+    <script src="/static/login.js"></script>
+
+</body>
+
+</html>

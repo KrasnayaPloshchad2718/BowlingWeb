@@ -1,0 +1,307 @@
+/* =====================================
+   全体
+===================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    font-family:
+        "Segoe UI",
+        "Yu Gothic",
+        sans-serif;
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:
+        linear-gradient(
+            180deg,
+            #4a0000,
+            #1b1b1b
+        );
+
+    color:white;
+
+    overflow:hidden;
+
+}
+
+
+/* =====================================
+   背景グリッド
+===================================== */
+
+body::before{
+
+    content:"";
+
+    position:fixed;
+
+    inset:0;
+
+    background-image:
+
+        linear-gradient(
+            rgba(255,255,255,.05) 1px,
+            transparent 1px
+        ),
+
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.05) 1px,
+            transparent 1px
+        );
+
+    background-size:40px 40px;
+
+    z-index:-2;
+
+}
+
+
+/* =====================================
+   ボウリングピン
+===================================== */
+
+body::after{
+
+    content:"🎳";
+
+    position:fixed;
+
+    right:40px;
+
+    bottom:20px;
+
+    font-size:120px;
+
+    opacity:.15;
+
+    animation:swing 3s ease-in-out infinite;
+
+}
+
+@keyframes swing{
+
+    0%{
+        transform:rotate(-8deg);
+    }
+
+    50%{
+        transform:rotate(8deg);
+    }
+
+    100%{
+        transform:rotate(-8deg);
+    }
+
+}
+
+
+/* =====================================
+   カード
+===================================== */
+
+.container{
+
+    width:600px;
+
+    max-width:90%;
+
+    padding:40px;
+
+    border-radius:20px;
+
+    background:
+
+        rgba(30,30,30,.92);
+
+    border:3px solid #d11111;
+
+    text-align:center;
+
+    box-shadow:
+
+        0 0 25px rgba(255,0,0,.45);
+
+    animation:
+
+        fadeIn .8s ease;
+
+}
+
+
+/* =====================================
+   タイトル
+===================================== */
+
+.container h1{
+
+    font-size:52px;
+
+    color:#ffd700;
+
+    letter-spacing:3px;
+
+    margin-bottom:25px;
+
+    text-shadow:
+
+        0 0 10px gold,
+
+        0 0 25px orange,
+
+        0 0 40px red;
+
+}
+
+
+/* =====================================
+   本文
+===================================== */
+
+.container p{
+
+    font-size:22px;
+
+    margin:15px 0;
+
+    color:#eeeeee;
+
+}
+
+
+/* =====================================
+   ナビ
+===================================== */
+
+.redirect-nav{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:25px;
+
+    margin-top:35px;
+
+}
+
+.redirect-nav a{
+
+    text-decoration:none;
+
+    color:white;
+
+    font-size:22px;
+
+    font-weight:bold;
+
+    background:#b40000;
+
+    padding:
+
+        14px
+        28px;
+
+    border-radius:12px;
+
+    transition:.25s;
+
+    box-shadow:
+
+        0 0 12px rgba(255,0,0,.4);
+
+}
+
+.redirect-nav a:hover{
+
+    background:#ff3030;
+
+    transform:
+
+        translateY(-4px);
+
+    box-shadow:
+
+        0 0 20px rgba(255,215,0,.6);
+
+}
+
+
+/* =====================================
+   フェードイン
+===================================== */
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+        transform:
+
+            translateY(40px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+
+            translateY(0);
+
+    }
+
+}
+
+
+/* =====================================
+   スマホ対応
+===================================== */
+
+@media (max-width:700px){
+
+    .container{
+
+        padding:30px;
+
+    }
+
+    .container h1{
+
+        font-size:38px;
+
+    }
+
+    .container p{
+
+        font-size:18px;
+
+    }
+
+    .redirect-nav{
+
+        flex-direction:column;
+
+    }
+
+    .redirect-nav a{
+
+        font-size:20px;
+
+    }
+
+}

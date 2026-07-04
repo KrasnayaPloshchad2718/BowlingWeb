@@ -1,0 +1,571 @@
+/* =====================================
+   全体
+===================================== */
+
+*{
+
+    margin:0;
+
+    padding:0;
+
+    box-sizing:border-box;
+
+}
+
+body{
+
+    font-family:
+        "Segoe UI",
+        "Yu Gothic",
+        sans-serif;
+
+    background:
+        linear-gradient(
+            180deg,
+            #4a0000,
+            #1b1b1b
+        );
+
+    color:white;
+
+    min-height:100vh;
+
+    overflow-x:hidden;
+
+}
+
+
+/* =====================================
+   背景
+===================================== */
+
+.background-grid{
+
+    position:fixed;
+
+    inset:0;
+
+    background-image:
+
+        linear-gradient(
+            rgba(255,255,255,.04) 1px,
+            transparent 1px
+        ),
+
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.04) 1px,
+            transparent 1px
+        );
+
+    background-size:
+
+        40px 40px;
+
+    z-index:-2;
+
+}
+
+.background-grid::after{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+
+        radial-gradient(
+
+            rgba(255,180,0,.15),
+
+            transparent 70%
+
+        );
+
+}
+
+/* =====================================
+   ディスプレイ用ナビ
+===================================== */
+
+.display-nav{
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:40px;
+
+    padding:14px 0;
+
+    background:#1a1a1a;
+
+    border-top:2px solid #b40000;
+    border-bottom:2px solid #b40000;
+
+    position:sticky;
+    top:0;
+    z-index:100;
+
+}
+
+/* リンク */
+.display-nav a{
+
+    text-decoration:none;
+
+    color:#ddd;
+
+    font-size:20px;
+    font-weight:bold;
+
+    padding:6px 18px;
+
+    border-radius:8px;
+
+    transition:0.2s;
+
+    letter-spacing:1px;
+
+}
+
+/* ホバー（控えめ） */
+.display-nav a:hover{
+
+    color:white;
+    background:#b40000;
+
+    transform:translateY(-1px);
+
+}
+
+/* 現在ページ */
+.display-nav a.active{
+
+    color:#111;
+    background:#ffd700;
+
+    box-shadow:0 0 10px rgba(255,215,0,0.5);
+
+}
+
+/* =====================================
+   ボウリングピン
+===================================== */
+
+.pin{
+
+    position:fixed;
+
+    font-size:90px;
+
+    opacity:.18;
+
+    user-select:none;
+
+    pointer-events:none;
+
+    animation:
+
+        swing 3s ease-in-out infinite;
+
+}
+
+.pin.left{
+
+    left:30px;
+
+    bottom:30px;
+
+}
+
+.pin.right{
+
+    right:30px;
+
+    top:120px;
+
+}
+
+@keyframes swing{
+
+    0%{
+
+        transform:rotate(-5deg);
+
+    }
+
+    50%{
+
+        transform:rotate(5deg);
+
+    }
+
+    100%{
+
+        transform:rotate(-5deg);
+
+    }
+
+}
+
+
+/* =====================================
+   ヘッダー
+===================================== */
+
+header{
+
+    text-align:center;
+
+    padding:50px 20px 25px;
+
+}
+
+#title{
+
+    font-size:58px;
+
+    letter-spacing:5px;
+
+    color:#ffffff;
+
+    text-shadow:
+
+        0 0 10px #ff0000,
+
+        0 0 20px #ff4444,
+
+        0 0 35px gold;
+
+    transition:.5s;
+
+}
+
+.subtitle{
+
+    margin-top:15px;
+
+    font-size:24px;
+
+    color:#ffe082;
+
+}
+
+
+/* =====================================
+   メイン
+===================================== */
+
+main{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:30px;
+
+}
+
+
+/* =====================================
+   ログインカード
+===================================== */
+
+.login-card{
+
+    width:470px;
+
+    background:
+
+        rgba(30,30,30,.92);
+
+    border:
+
+        3px solid #d11111;
+
+    border-radius:20px;
+
+    padding:35px;
+
+    box-shadow:
+
+        0 0 30px rgba(255,0,0,.35);
+
+    transition:.3s;
+
+}
+
+.login-card:hover{
+
+    transform:translateY(-5px);
+
+    box-shadow:
+
+        0 0 40px rgba(255,215,0,.35);
+
+}
+
+.login-card h2{
+
+    text-align:center;
+
+    color:#ffe082;
+
+    font-size:34px;
+
+    margin-bottom:12px;
+
+}
+
+.message{
+
+    text-align:center;
+
+    color:#dddddd;
+
+    margin-bottom:28px;
+
+}
+/* =====================================
+   入力欄
+===================================== */
+
+.input-area{
+
+    margin-bottom:22px;
+
+}
+
+.input-area label{
+
+    display:block;
+
+    font-size:18px;
+
+    margin-bottom:8px;
+
+    color:#ffe082;
+
+    font-weight:bold;
+
+    letter-spacing:1px;
+
+}
+
+.input-area input{
+
+    width:100%;
+
+    padding:14px;
+
+    font-size:20px;
+
+    border:2px solid #666;
+
+    border-radius:10px;
+
+    background:#111;
+
+    color:white;
+
+    outline:none;
+
+    transition:.25s;
+
+}
+
+.input-area input:focus{
+
+    border-color:#ffd700;
+
+    box-shadow:
+
+        0 0 15px rgba(255,215,0,.6);
+
+}
+
+
+/* =====================================
+   パスワード表示
+===================================== */
+
+.show-password{
+
+    margin-top:10px;
+
+    margin-bottom:25px;
+
+    font-size:17px;
+
+    color:#dddddd;
+
+}
+
+.show-password input{
+
+    margin-right:8px;
+
+}
+
+
+/* =====================================
+   ボタン
+===================================== */
+
+#loginButton{
+
+    width:100%;
+
+    padding:15px;
+
+    font-size:22px;
+
+    font-weight:bold;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    color:white;
+
+    background:
+
+        linear-gradient(
+            90deg,
+            #b40000,
+            #ff2a2a
+        );
+
+    transition:.25s;
+
+}
+
+#loginButton:hover{
+
+    transform:translateY(-3px);
+
+    background:
+
+        linear-gradient(
+            90deg,
+            #ff2a2a,
+            #ff6666
+        );
+
+    box-shadow:
+
+        0 0 20px rgba(255,0,0,.5);
+
+}
+
+#loginButton:active{
+
+    transform:scale(.98);
+
+}
+
+
+/* =====================================
+   フッター
+===================================== */
+
+footer{
+
+    margin-top:40px;
+
+    text-align:center;
+
+    padding:25px;
+
+    border-top:2px solid #b40000;
+
+    background:#1b1b1b;
+
+}
+
+#clock{
+
+    display:inline-block;
+
+    font-size:32px;
+
+    font-weight:bold;
+
+    color:#00ffcc;
+
+    font-family:
+        Consolas,
+        monospace;
+
+    letter-spacing:3px;
+
+    margin-bottom:10px;
+
+    text-shadow:
+
+        0 0 8px #00ffee,
+
+        0 0 18px #00ffee;
+
+}
+
+footer p{
+
+    color:#bbbbbb;
+
+    font-size:16px;
+
+}
+
+
+/* =====================================
+   スマホ対応
+===================================== */
+
+@media (max-width:700px){
+
+    #title{
+
+        font-size:40px;
+
+    }
+
+    .subtitle{
+
+        font-size:18px;
+
+    }
+
+    .login-card{
+
+        width:95%;
+
+        padding:25px;
+
+    }
+
+    .input-area input{
+
+        font-size:18px;
+
+    }
+
+    #loginButton{
+
+        font-size:20px;
+
+    }
+
+    #clock{
+
+        font-size:24px;
+
+    }
+
+}
