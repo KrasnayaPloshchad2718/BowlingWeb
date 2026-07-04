@@ -1,7 +1,7 @@
 from flask import url_for,Flask, session,jsonify, request, redirect, render_template, Response
 import os
 import uuid
-
+import json
 
 
 # ==================================
@@ -207,14 +207,14 @@ def create_result():
     return jsonify({
         "result": "ok",
         "id": result_id,
-        "url": f"/result/{result_id}"
+        "url": f"/results/{result_id}"
     })
 
 # ==================================
 # 結果ページ表示
 # ==================================
 
-@app.route("/result/<result_id>")
+@app.route("/results/<result_id>")
 def result_page(result_id):
 
     results = load_results()
@@ -225,7 +225,7 @@ def result_page(result_id):
         return "Not Found", 404
 
     return render_template(
-        "result.html",
+        "results.html",
         data=data,
         result_id=result_id
     )
