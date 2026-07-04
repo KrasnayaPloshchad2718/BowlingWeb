@@ -1,173 +1,88 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 
 <head>
-
     <meta charset="UTF-8">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BowlingWeb - Client</title>
 
     <link rel="stylesheet" href="/static/client.css">
-
 </head>
 
 <body>
 
     <h1>BowlingWeb</h1>
 
-    <!-- 状態表示 -->
-    <div id="status">
-        未接続
-    </div>
+    <!-- 状態 -->
+    <div id="status">未接続</div>
+
+    <hr>
 
     <!-- レーン選択 -->
-    <div class="section">
-
-        <label for="team">
-            レーン：
-        </label>
-
+    <div>
+        レーン：
         <select id="team">
-
             <option value="1">1</option>
-
             <option value="2">2</option>
-
             <option value="3">3</option>
-
             <option value="4">4</option>
-
         </select>
-
     </div>
 
-    <!-- 開始ボタン -->
-    <button id="startButton">
-        開始
-    </button>
+    <button id="startButton">開始</button>
 
-    <!-- お題・入力 -->
-    <div class="section">
+    <hr>
 
-        <div class="odaiRow">
-
-            <h2 id="A">
-                A：
-            </h2>
-
-            <label for="scoreA">
-                本数：
-            </label>
-
-            <input
-                id="scoreA"
-                type="number"
-                min="0"
-                max="10"
-            >
-
-        </div>
-
-        <hr>
-
-        <div class="odaiRow">
-
-            <h2 id="B">
-                B：
-            </h2>
-
-            <label for="scoreB">
-                本数：
-            </label>
-
-            <input
-                id="scoreB"
-                type="number"
-                min="0"
-                max="10"
-            >
-
-        </div>
-
-        <hr>
-
-        <div class="odaiRow">
-
-            <h2 id="C">
-                C：
-            </h2>
-
-            <label for="scoreC">
-                本数：
-            </label>
-
-            <input
-                id="scoreC"
-                type="number"
-                min="0"
-                max="10"
-            >
-
-        </div>
-
+    <!-- お題 -->
+    <div>
+        <h2 id="A">A：</h2>
+        <input id="scoreA" type="number">
     </div>
 
-    <!-- 宣言本数 -->
-    <div
-        class="section"
-        id="declareArea"
-        style="display:none;"
-    >
-
-        <h3>
-            倒す本数を宣言
-        </h3>
-
-        <label for="declare">
-            本数：
-        </label>
-
-        <input
-            id="declare"
-            type="number"
-            min="0"
-            max="10"
-        >
-
+    <div>
+        <h2 id="B">B：</h2>
+        <input id="scoreB" type="number">
     </div>
+
+    <div>
+        <h2 id="C">C：</h2>
+        <input id="scoreC" type="number">
+    </div>
+
+    <hr>
+
+    <!-- 宣言 -->
+    <div id="declareArea" style="display:none;">
+        <h3>倒す本数を宣言</h3>
+        <input id="declare" type="number">
+    </div>
+
+    <hr>
 
     <!-- 合計 -->
     <h2 id="total"></h2>
 
-    <!-- 計算 -->
-    <button id="calcButton">
-        合計を計算
-    </button>
+    <button id="calcButton">計算</button>
 
-    <!-- ナビゲーション -->
+    <hr>
+
+    <!-- ここが追加ポイント -->
+    <div id="qr"></div>
+
+    <hr>
+
+    <!-- ナビ -->
     <nav>
-
-        <a
-            href="/"
-            class="active"
-        >
-            抽選
-        </a>
-
-        <a href="/display">
-            スコア表示
-        </a>
-
-        <a href="/rules">
-            ルール
-        </a>
-
+        <a href="/" class="active">抽選</a>
+        <a href="/display">スコア表示</a>
+        <a href="/rules">ルール</a>
     </nav>
+
+    <!-- QRライブラリ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <script src="/static/client.js"></script>
 
 </body>
 
 </html>
-
