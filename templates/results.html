@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bowling Result</title>
+
+    <link rel="stylesheet" href="/static/result.css">
+</head>
+
+<body>
+
+    <div class="background"></div>
+
+    <header>
+        <h1>BOWLING RESULT</h1>
+        <p class="subtitle">★ American Diner Score Card ★</p>
+    </header>
+
+    <main class="card">
+
+        <section class="score-box">
+
+            <h2>RESULT</h2>
+
+            <div class="info">
+                <div>TEAM</div>
+                <div class="value">{{ data.team }}</div>
+            </div>
+
+            <div class="info">
+                <div>SCORE</div>
+                <div class="value">{{ data.score }}</div>
+            </div>
+
+        </section>
+
+        <section class="share">
+
+            <h2>SHARE</h2>
+
+            <button onclick="copyText()">📋 コピー</button>
+
+            <button onclick="downloadImage()">📸 画像生成</button>
+
+            <a id="igLink" target="_blank">📱 Instagramを開く</a>
+
+            <div id="qr"></div>
+
+        </section>
+
+    </main>
+
+    <footer>
+        Bowling Challenge System
+    </footer>
+
+    <script>
+        const TEAM = "{{ data.team }}";
+        const SCORE = "{{ data.score }}";
+    </script>
+
+    <script src="/static/result.js"></script>
+
+</body>
+
+</html>
