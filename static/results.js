@@ -1,120 +1,123 @@
 // =====================================
-// 結果データ受け取り
-// Flaskから window.RESULT_DATA として渡される前提
+// results.js（表示＆画像生成のみ）
 // =====================================
 
-const data = window.RESULT_DATA;
+let data = null;
 
-if (!data) {
-    console.error("RESULT_DATA がありません");
+// =====================================
+// 初期化
+// =====================================
+
+window.addEventListener("load", async () => {
+    await loadResult();
+    drawResult();
+});
+
+// =====================================
+// データ取得
+// =====================================
+
+async function loadResult() {
+
+    const pathParts = window.location.pathname.split("/");
+    const id = pathParts[pathParts.length - 1];
+
+    try {
+        const res = await fetch(`/results/${id}`);
+
+        if (!res.ok) {
+            throw new Error("Not Found");
+        }
+
+        data = await res.json().catch(() => null);
+
+    } catch (e) {
+        console.error(e);
+        document.getElementById("status").textContent =
+            "結果が見つかりません";
+    }
 }
 
 // =====================================
-// canvas初期化
-// =====================================
-
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-// 高解像度対応（ぼやけ防止）
-canvas.width = 1080;
-canvas.height = 1080;
-
-// =====================================
-// 画像描画メイン
+// 画像生成（統一デザイン）
 // =====================================
 
 function drawResult() {
 
-    if (!data) return;
+    const canvas = document.getElementById("canvas");
+    if (!canvas) return;
 
-    // 背景
-    ctx.fillStyle = "#0f172a"; // ダークネイビー
+    const ctx = canvas.getContext("2d");
+
+    // 背景（ダイナー統一）
+    ctx.fillStyle = "#111";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // 上ライン（ストライプ）
+    for (let i = 0; i < canvas.width; i += 40) {
+        ctx.fillStyle = (i / 40) % 2 === 0 ? "#b30000" : "#ffffff";
+        ctx.fillRect(i, 0, 20, 12);
+    }
+
     // タイトル
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 70px sans-serif";
-    ctx.fillText("BOWLING RESULT", 80, 140);
+    ctx.fillStyle = "#ff3b3b";
+    ctx.shadowColor = "#ff3b3b";
+    ctx.shadowBlur = 25;
+    ctx.font = "bold 42px Arial";
+    ctx.textAlign = "center";
 
-    // 区切り線
-    ctx.strokeStyle = "#334155";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(80, 180);
-    ctx.lineTo(1000, 180);
-    ctx.stroke();
+    ctx.fillText("BOWLING RESULT", canvas.width / 2, 90);
 
-    // チーム
-    ctx.fillStyle = "#cbd5e1";
-    ctx.font = "40px sans-serif";
-    ctx.fillText("レーン", 80, 300);
+    ctx.shadowBlur = 0;
 
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 80px sans-serif";
-    ctx.fillText(String(data.team), 80, 400);
+    // レーン
+    const team = data?.team ?? "UNKNOWN";
+    const score = data?.score ?? 0;
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 32px Arial";
+    ctx.fillText(`レーン ${team}`, canvas.width / 2, 170);
 
     // スコア
-    ctx.fillStyle = "#cbd5e1";
-    ctx.font = "40px sans-serif";
-    ctx.fillText("スコア", 80, 550);
+    ctx.fillStyle = "#ffd700";
+    ctx.font = "bold 70px Arial";
+    ctx.fillText(score, canvas.width / 2, 280);
 
-    ctx.fillStyle = "#22c55e";
-    ctx.font = "bold 120px sans-serif";
-    ctx.fillText(String(data.score), 80, 680);
-
-    // 装飾バー
-    ctx.fillStyle = "#22c55e";
-    ctx.fillRect(80, 740, 900, 10);
-
-    // QR案内（任意テキスト）
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "30px sans-serif";
-    ctx.fillText("Scan QR to view full results", 80, 850);
-
-    // プレビュー画像にも反映（任意）
-    const img = document.getElementById("preview");
-    if (img) {
-        img.src = canvas.toDataURL("image/png");
-    }
+    // フレーム
+    ctx.strokeStyle = "#ff3b3b";
+    ctx.lineWidth = 6;
+    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
 }
 
-// 初期描画
-drawResult();
-
 // =====================================
-// 共有機能（Instagram含むOS共有）
+// 共有ボタン（画像だけ）
 // =====================================
 
-async function share() {
+async function shareImage() {
 
-    const blob = await new Promise(resolve => {
-        canvas.toBlob(resolve, "image/png");
-    });
+    const canvas = document.getElementById("canvas");
+    if (!canvas) return;
 
-    const file = new File([blob], "bowling-result.png", {
-        type: "image/png"
-    });
+    canvas.toBlob(async (blob) => {
 
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        const file = new File([blob], "result.png", {
+            type: "image/png"
+        });
 
-        try {
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+
             await navigator.share({
                 files: [file],
-                title: "Bowling Result",
-                text: "今日の結果！"
+                title: "Bowling Result"
             });
-        } catch (e) {
-            console.error(e);
+
+        } else {
+            alert("この端末は共有非対応です");
         }
 
-    } else {
-        alert("この端末は画像共有に対応していません");
-    }
+    });
 }
 
-// =====================================
-// グローバル公開（HTMLから呼ぶため）
-// =====================================
-
-window.share = share;
+document
+    .getElementById("shareBtn")
+    ?.addEventListener("click", shareImage);
