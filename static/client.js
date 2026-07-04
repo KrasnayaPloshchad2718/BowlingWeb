@@ -412,9 +412,11 @@ function sendResult(total) {
         });
 
         alert("結果URL生成:\n" + url);
+
     })
-    .catch(err => {
-        console.error(err);
-        alert("QR生成に失敗しました。");
+    .catch(error => {
+        console.error(error);
+        alert("QR生成に失敗しました");
     });
+
 }
