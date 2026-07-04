@@ -136,7 +136,7 @@ function drawTitle() {
     const text = "Zeze1-2お題deボウリング　RESULT";
 
     // ===== 外側グロー（強） =====
-    ctx.font = "bold 80px Arial";
+    ctx.font = "bold 50px Arial";
     ctx.shadowColor = "#ff0033";
     ctx.shadowBlur = 40;
     ctx.fillStyle = "#ff2b6d";
