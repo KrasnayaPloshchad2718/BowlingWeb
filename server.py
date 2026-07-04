@@ -2,7 +2,7 @@ from flask import url_for,Flask, session,jsonify, request, redirect, render_temp
 import os
 import uuid
 
-results = load_results()
+
 
 # ==================================
 # 結果保存（JSON）
@@ -25,7 +25,7 @@ def load_results():
 def save_results(data):
     with open(RESULT_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
+results = load_results()
 # ==================================
 # サーバー設定
 # ==================================
