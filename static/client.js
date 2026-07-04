@@ -240,46 +240,64 @@ document
 //======================================
 //QRとか
 //======================================
+
 function sendResult(total) {
 
-    fetch("/create_result", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            team: document.getElementById("team").value,
-            score: total
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
+    const lane =
+        document.getElementById("team").value;
 
-        console.log("create_result:", data);
+    const odai =
+        currentIndexes.map(i => OdaiList[i]);
 
-        if (!data.id) {
-            alert("IDが返ってきていません");
-            return;
-        }
+    const scoreA =
+        document.getElementById("scoreA").value;
 
-        const url = `${window.location.origin}/results/${data.id}`;
+    const scoreB =
+        document.getElementById("scoreB").value;
 
-        const qr = document.getElementById("qr");
-        qr.innerHTML = "";
+    const scoreC =
+        document.getElementById("scoreC").value;
 
-        new QRCode(qr, {
-            text: url,
-            width: 180,
-            height: 180
-        });
+    const params = new URLSearchParams({
 
-        alert("結果URL生成:\n" + url);
-    })
-    .catch(error => {
-        console.error(error);
-        alert("QR生成に失敗しました");
+        lane: lane,
+
+        score: total,
+
+        oa: odai[0],
+        ob: odai[1],
+        oc: odai[2],
+
+        sa: scoreA,
+        sb: scoreB,
+        sc: scoreC
+
     });
+
+    const url =
+        window.location.origin +
+        "/results?" +
+        params.toString();
+
+    const qr =
+        document.getElementById("qr");
+
+    qr.innerHTML = "";
+
+    new QRCode(qr, {
+
+        text: url,
+
+        width: 180,
+
+        height: 180
+
+    });
+
+    console.log(url);
+
 }
+
 // =====================================
 // 合計計算（お題ごとの独立計算・修正版）
 // =====================================
