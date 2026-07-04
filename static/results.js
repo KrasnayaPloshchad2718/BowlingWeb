@@ -2,23 +2,45 @@
 // results.js 1/3（完全再設計版）
 // 高解像度・座標系・データ確定
 //=====================================
-function share() {
+async function shareImage() {
 
-    const url = window.location.href;
+    const canvas = document.getElementById("canvas");
 
-    if (navigator.share) {
+    canvas.toBlob(async (blob) => {
 
-        navigator.share({
-            title: "Bowling Result",
-            text: "スコア結果",
-            url: url
-        }).catch(err => {
-            console.log("share error:", err);
+        if (!blob) {
+            alert("画像生成に失敗");
+            return;
+        }
+
+        const file = new File([blob], "bowling-result.png", {
+            type: "image/png"
         });
 
-    } else {
-        alert("この端末は共有非対応");
-    }
+        //=========================
+        // 共有可能チェック
+        //=========================
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+
+            try {
+
+                await navigator.share({
+                    title: "Bowling Result",
+                    text: "結果を共有します",
+                    files: [file]   // ← これが画像共有
+                });
+
+            } catch (err) {
+                console.error(err);
+            }
+
+        } else {
+
+            alert("この端末は画像共有に対応していません");
+        }
+
+    }, "image/png");
 }
 
 //=========================
