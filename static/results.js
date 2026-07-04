@@ -1,261 +1,120 @@
-
 // =====================================
-// Bowling Result JS
-// 第1回：基本機能＋QR＋コピー
+// 結果データ受け取り
+// Flaskから window.RESULT_DATA として渡される前提
 // =====================================
 
+const data = window.RESULT_DATA;
 
-// Instagramリンク設定
-function setupInstagramLink() {
-
-    const link =
-        document.getElementById("igLink");
-
-    if (!link) return;
-
-    link.href = "https://www.instagram.com/";
+if (!data) {
+    console.error("RESULT_DATA がありません");
 }
 
-
-// -------------------------------------
-// テキストコピー
-// -------------------------------------
-function copyText() {
-
-    const text =
-        `🏆 Bowling Result
-Team: ${TEAM}
-Score: ${SCORE}`;
-
-    navigator.clipboard.writeText(text);
-
-    alert("コピーしました！");
-}
-
-
-// -------------------------------------
-// QRコード生成
-// -------------------------------------
-function generateQR() {
-
-    const qrDiv =
-        document.getElementById("qr");
-
-    if (!qrDiv) return;
-
-    qrDiv.innerHTML = "";
-
-    const url =
-        window.location.href;
-
-    new QRCode(qrDiv, {
-
-        text: url,
-        width: 180,
-        height: 180
-
-    });
-}
-
-
-// -------------------------------------
-// 初期化
-// -------------------------------------
-window.addEventListener("DOMContentLoaded", () => {
-
-    setupInstagramLink();
-
-    generateQR();
-
-});
-
-
 // =====================================
-// 第2回：画像生成（Instagram用）
+// canvas初期化
 // =====================================
 
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-// -------------------------------------
-// 画像生成（Canvas）
-// -------------------------------------
-function downloadImage() {
+// 高解像度対応（ぼやけ防止）
+canvas.width = 1080;
+canvas.height = 1080;
 
-    const canvas =
-        document.createElement("canvas");
+// =====================================
+// 画像描画メイン
+// =====================================
 
-    canvas.width = 1080;
-    canvas.height = 1080;
+function drawResult() {
 
-    const ctx =
-        canvas.getContext("2d");
+    if (!data) return;
 
-    // 背景（ダイナー風）
-    ctx.fillStyle = "#111";
-    ctx.fillRect(0, 0, 1080, 1080);
-
-    // 外枠
-    ctx.strokeStyle = "#b40000";
-    ctx.lineWidth = 10;
-    ctx.strokeRect(30, 30, 1020, 1020);
+    // 背景
+    ctx.fillStyle = "#0f172a"; // ダークネイビー
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // タイトル
-    ctx.fillStyle = "#ffd166";
+    ctx.fillStyle = "#ffffff";
     ctx.font = "bold 70px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("BOWLING RESULT", 540, 180);
+    ctx.fillText("BOWLING RESULT", 80, 140);
 
-    // サブ
-    ctx.fillStyle = "#aaa";
-    ctx.font = "30px sans-serif";
-    ctx.fillText("American Diner Score Card", 540, 240);
+    // 区切り線
+    ctx.strokeStyle = "#334155";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(80, 180);
+    ctx.lineTo(1000, 180);
+    ctx.stroke();
 
-    // TEAM
+    // チーム
+    ctx.fillStyle = "#cbd5e1";
+    ctx.font = "40px sans-serif";
+    ctx.fillText("TEAM", 80, 300);
+
     ctx.fillStyle = "#ffffff";
-    ctx.font = "50px sans-serif";
-    ctx.fillText("TEAM", 300, 450);
+    ctx.font = "bold 80px sans-serif";
+    ctx.fillText(String(data.team), 80, 400);
 
-    ctx.fillStyle = "#ffd166";
-    ctx.font = "80px sans-serif";
-    ctx.fillText(TEAM, 300, 550);
+    // スコア
+    ctx.fillStyle = "#cbd5e1";
+    ctx.font = "40px sans-serif";
+    ctx.fillText("SCORE", 80, 550);
 
-    // SCORE
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "50px sans-serif";
-    ctx.fillText("SCORE", 780, 450);
+    ctx.fillStyle = "#22c55e";
+    ctx.font = "bold 120px sans-serif";
+    ctx.fillText(String(data.score), 80, 680);
 
-    ctx.fillStyle = "#ff1a1a";
-    ctx.font = "80px sans-serif";
-    ctx.fillText(SCORE, 780, 550);
+    // 装飾バー
+    ctx.fillStyle = "#22c55e";
+    ctx.fillRect(80, 740, 900, 10);
 
-    // 下部メッセージ
-    ctx.fillStyle = "#666";
+    // QR案内（任意テキスト）
+    ctx.fillStyle = "#94a3b8";
     ctx.font = "30px sans-serif";
-    ctx.fillText("Share your result on Instagram!", 540, 900);
+    ctx.fillText("Scan QR to view full results", 80, 850);
 
-    // ダウンロード
-    const link =
-        document.createElement("a");
-
-    link.download =
-        `bowling_result_${TEAM}_${SCORE}.png`;
-
-    link.href =
-        canvas.toDataURL("image/png");
-
-    link.click();
+    // プレビュー画像にも反映（任意）
+    const img = document.getElementById("preview");
+    if (img) {
+        img.src = canvas.toDataURL("image/png");
+    }
 }
 
+// 初期描画
+drawResult();
 
 // =====================================
-// 第3回：UX仕上げ（演出＋共有強化）
+// 共有機能（Instagram含むOS共有）
 // =====================================
 
+async function share() {
 
-// -------------------------------------
-// コピー成功演出
-// -------------------------------------
-function copyText() {
+    const blob = await new Promise(resolve => {
+        canvas.toBlob(resolve, "image/png");
+    });
 
-    const text =
-        `🏆 Bowling Result
-Team: ${TEAM}
-Score: ${SCORE}`;
+    const file = new File([blob], "bowling-result.png", {
+        type: "image/png"
+    });
 
-    navigator.clipboard.writeText(text);
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
 
-    showToast("コピーしました！");
+        try {
+            await navigator.share({
+                files: [file],
+                title: "Bowling Result",
+                text: "今日の結果！"
+            });
+        } catch (e) {
+            console.error(e);
+        }
+
+    } else {
+        alert("この端末は画像共有に対応していません");
+    }
 }
 
+// =====================================
+// グローバル公開（HTMLから呼ぶため）
+// =====================================
 
-// -------------------------------------
-// トースト表示（通知UI）
-// -------------------------------------
-function showToast(message) {
-
-    let toast =
-        document.createElement("div");
-
-    toast.textContent = message;
-
-    toast.style.position = "fixed";
-    toast.style.bottom = "30px";
-    toast.style.left = "50%";
-    toast.style.transform = "translateX(-50%)";
-    toast.style.background = "#b40000";
-    toast.style.color = "white";
-    toast.style.padding = "12px 20px";
-    toast.style.borderRadius = "10px";
-    toast.style.fontSize = "16px";
-    toast.style.zIndex = 9999;
-    toast.style.opacity = 0;
-    toast.style.transition = "0.3s";
-
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.opacity = 1;
-    }, 50);
-
-    setTimeout(() => {
-        toast.style.opacity = 0;
-    }, 1500);
-
-    setTimeout(() => {
-        toast.remove();
-    }, 2000);
-}
-
-
-// -------------------------------------
-// QRを少し演出（揺らす）
-// -------------------------------------
-function animateQR() {
-
-    const qr =
-        document.getElementById("qr");
-
-    if (!qr) return;
-
-    let angle = -2;
-
-    setInterval(() => {
-
-        angle *= -1;
-
-        qr.style.transform =
-            `rotate(${angle}deg) scale(1.02)`;
-
-        setTimeout(() => {
-            qr.style.transform = "none";
-        }, 400);
-
-    }, 2000);
-}
-
-
-// -------------------------------------
-// Instagramリンク補強
-// -------------------------------------
-function setupInstagramLink() {
-
-    const link =
-        document.getElementById("igLink");
-
-    if (!link) return;
-
-    link.href = "https://www.instagram.com/";
-
-    link.target = "_blank";
-}
-
-
-// -------------------------------------
-// 初期化
-// -------------------------------------
-window.addEventListener("DOMContentLoaded", () => {
-
-    setupInstagramLink();
-
-    animateQR();
-
-});
+window.share = share;
