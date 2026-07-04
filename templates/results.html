@@ -1,24 +1,92 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
+
     <meta charset="UTF-8">
-    <title>Result</title>
-    <link rel="stylesheet" href="/static/results.css">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Bowling Result</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/results.css') }}">
+
 </head>
 
 <body>
-<script>
-    window.RESULT_DATA = {{ data | tojson }};
-</script>
-<div class="container">
 
-    <canvas id="canvas" width="1080" height="1080"></canvas>
+    <div class="background-grid"></div>
 
-    <img id="preview" />
+    <div class="container">
 
-    <button onclick="share()">共有</button>
+        <canvas
+            id="canvas"
+            width="1080"
+            height="1080">
+        </canvas>
 
-</div>
-<script src="/static/results.js"></script>
+        <div class="buttons">
+
+            <button
+                id="shareButton">
+
+                Instagramへ共有
+
+            </button>
+
+            <button
+                id="saveButton">
+
+                画像保存
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const resultData = {
+
+            lane: "{{ lane }}",
+
+            score: "{{ score }}",
+
+            odai: [
+
+                "{{ odaiA|e }}",
+
+                "{{ odaiB|e }}",
+
+                "{{ odaiC|e }}"
+
+            ],
+
+            scores: [
+
+                "{{ scoreA }}",
+
+                "{{ scoreB }}",
+
+                "{{ scoreC }}"
+
+            ]
+
+        };
+
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+    <script
+        src="{{ url_for('static', filename='js/results.js') }}">
+    </script>
+
 </body>
+
 </html>
