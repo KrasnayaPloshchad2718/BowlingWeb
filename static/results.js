@@ -208,10 +208,8 @@ function drawCard(){
 
 function drawPins(){
 
-    ctx.fillStyle = "#ffffff";
-
     const baseX = 200;
-    const baseY = 980;
+    const baseY = 900;
 
     const rows = [1,2,3,4];
 
@@ -220,34 +218,35 @@ function drawPins(){
     for(let i=0;i<rows.length;i++){
 
         let count = rows[i];
-
         let xOffset = (4 - count) * 25;
 
         for(let j=0;j<count;j++){
 
+            // 🔥 白禁止 → 赤ベース＋黒縁
             ctx.beginPath();
 
             ctx.arc(
-                baseX + xOffset + j * 50,
+                baseX + xOffset + j * 55,
                 baseY + yOffset,
-                14,
+                16,
                 0,
                 Math.PI * 2
             );
 
-            ctx.fillStyle = "#ffffff";
+            // 塗り（赤）
+            ctx.fillStyle = "#c00000";
             ctx.fill();
 
-            ctx.strokeStyle = "#b00000";
-            ctx.lineWidth = 3;
+            // 縁（黒でくっきり）
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 4;
             ctx.stroke();
 
         }
 
-        yOffset += 45;
+        yOffset += 55;
     }
 }
-
 
 //=====================================
 // ピン
@@ -324,87 +323,90 @@ function drawPin(x,y,s){
 //=====================================
 // 文字・ピン・レイアウト改善版
 //=====================================
+//=====================================
+// レイアウト完全修正版
+//=====================================
 
 function drawTexts(){
 
     //=========================
-    // 背景タイトル
+    // タイトル（上・強め）
     //=========================
 
     ctx.fillStyle = "#8b0000";
-    ctx.font = "bold 72px Arial";
+    ctx.font = "bold 64px Arial";
     ctx.textAlign = "center";
 
     ctx.fillText(
         "BOWLING RESULT",
         W / 2,
-        180
+        120
     );
 
-    // サブタイトル（少し下げる）
     ctx.fillStyle = "#333";
-    ctx.font = "28px Arial";
+    ctx.font = "22px Arial";
 
     ctx.fillText(
         "American Diner Challenge",
         W / 2,
-        230
+        160
     );
 
     //=========================
-    // レーン＆スコア（中央上寄せ）
+    // LANE（小さく・控えめ）
     //=========================
 
-    ctx.fillStyle = "#111";
-    ctx.font = "bold 48px Arial";
+    ctx.fillStyle = "#666";
+    ctx.font = "20px Arial";
 
-    ctx.fillText("LANE", W / 2, 320);
+    ctx.fillText("LANE", W / 2, 210);
 
     ctx.fillStyle = "#b00000";
-    ctx.font = "bold 110px Arial";
+    ctx.font = "bold 60px Arial";
 
     ctx.fillText(
         String(resultData.lane),
         W / 2,
-        430
+        280
     );
 
-    ctx.fillStyle = "#111";
-    ctx.font = "bold 40px Arial";
+    //=========================
+    // SCORE（少し上へ）
+    //=========================
 
-    ctx.fillText("TOTAL SCORE", W / 2, 520);
+    ctx.fillStyle = "#111";
+    ctx.font = "24px Arial";
+
+    ctx.fillText("TOTAL SCORE", W / 2, 340);
 
     ctx.fillStyle = "#d00000";
-    ctx.font = "bold 110px Arial";
+    ctx.font = "bold 80px Arial";
 
     ctx.fillText(
         String(resultData.score),
         W / 2,
-        630
+        430
     );
 
     //=========================
-    // お題エリア（下に大きくずらす）
+    // お題エリア（さらに下げて分離）
     //=========================
 
-    // 半透明背景（可読性改善）
-    ctx.fillStyle = "rgba(0,0,0,0.35)";
-    ctx.fillRect(80, 700, 920, 260);
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.fillRect(60, 500, 980, 320);
 
-    // お題タイトル
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 30px Arial";
     ctx.textAlign = "left";
 
-    ctx.fillText("ODAI", 120, 750);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 26px Arial";
 
-    // お題
-    ctx.font = "28px Arial";
+    ctx.fillText("ODAI", 100, 550);
 
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(resultData.odai[0], 120, 810);
-    ctx.fillText(resultData.odai[1], 120, 860);
-    ctx.fillText(resultData.odai[2], 120, 910);
+    ctx.font = "24px Arial";
+
+    ctx.fillText(resultData.odai[0], 100, 610);
+    ctx.fillText(resultData.odai[1], 100, 660);
+    ctx.fillText(resultData.odai[2], 100, 710);
 
     //=========================
     // スコア（右側・強調）
@@ -412,19 +414,18 @@ function drawTexts(){
 
     ctx.textAlign = "right";
 
-    ctx.fillStyle = "#ffd700"; // 金色で強調
-    ctx.font = "bold 28px Arial";
+    ctx.fillStyle = "#ffd700";
+    ctx.font = "bold 26px Arial";
 
-    ctx.fillText(resultData.scores[0], 960, 810);
-    ctx.fillText(resultData.scores[1], 960, 860);
-    ctx.fillText(resultData.scores[2], 960, 910);
+    ctx.fillText(resultData.scores[0], 1000, 610);
+    ctx.fillText(resultData.scores[1], 1000, 660);
+    ctx.fillText(resultData.scores[2], 1000, 710);
 
     //=========================
-    // ピン装飾（見えるように強化）
+    // ピン（白禁止・強コントラスト）
     //=========================
 
     drawPins();
-
 }
 
 //=====================================
