@@ -451,3 +451,7 @@ def internal_error(error):
 @app.route("/test")
 def test():
     return "OK"
+
+@app.route("/debug_results")
+def debug_results():
+    return jsonify(load_results())
