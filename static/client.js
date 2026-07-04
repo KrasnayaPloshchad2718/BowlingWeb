@@ -410,6 +410,6 @@ function sendResult(total) {
         width: 180,
         height: 180
     });
-
+}
     alert("結果URL生成:\n" + url);
 });
