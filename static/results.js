@@ -48,7 +48,7 @@ function drawResult() {
     // チーム
     ctx.fillStyle = "#cbd5e1";
     ctx.font = "40px sans-serif";
-    ctx.fillText("TEAM", 80, 300);
+    ctx.fillText("レーン", 80, 300);
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 80px sans-serif";
@@ -57,7 +57,7 @@ function drawResult() {
     // スコア
     ctx.fillStyle = "#cbd5e1";
     ctx.font = "40px sans-serif";
-    ctx.fillText("SCORE", 80, 550);
+    ctx.fillText("スコア", 80, 550);
 
     ctx.fillStyle = "#22c55e";
     ctx.font = "bold 120px sans-serif";
