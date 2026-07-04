@@ -1,7 +1,29 @@
 from flask import url_for,Flask, session,jsonify, request, redirect, render_template, Response
 import os
 
+results = load_results()
 
+# ==================================
+# 結果保存（JSON）
+# ==================================
+
+RESULT_FILE = "results.json"
+
+
+def load_results():
+    if not os.path.exists(RESULT_FILE):
+        return {}
+
+    with open(RESULT_FILE, "r", encoding="utf-8") as f:
+        try:
+            return json.load(f)
+        except:
+            return {}
+
+
+def save_results(data):
+    with open(RESULT_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
 # ==================================
 # サーバー設定
@@ -140,6 +162,57 @@ def logout():
 def redirect_page():
     return render_template("redirect.html")
 
+# ==================================
+# QR用結果作成
+# ==================================
+
+@app.route("/create_result", methods=["POST"])
+def create_result():
+
+    global results
+
+    data = request.get_json()
+
+    if data is None:
+        return jsonify({
+            "result": "error",
+            "message": "no json"
+        }), 400
+
+    result_id = str(uuid.uuid4())[:8]
+
+    results[result_id] = {
+        "team": data.get("team"),
+        "score": data.get("score")
+    }
+
+    save_results(results)
+
+    return jsonify({
+        "result": "ok",
+        "id": result_id,
+        "url": f"/result/{result_id}"
+    })
+
+# ==================================
+# 結果ページ表示
+# ==================================
+
+@app.route("/result/<result_id>")
+def result_page(result_id):
+
+    results = load_results()
+
+    data = results.get(result_id)
+
+    if not data:
+        return "Not Found", 404
+
+    return render_template(
+        "result.html",
+        data=data,
+        result_id=result_id
+    )
 
 # ==================================
 # display用データAPI
