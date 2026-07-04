@@ -209,7 +209,6 @@ def create_result():
         "id": result_id,
         "url": f"/results/{result_id}"
     })
-
 # ==================================
 # 結果ページ表示
 # ==================================
@@ -229,7 +228,6 @@ def result_page(result_id):
         data=data,
         result_id=result_id
     )
-
 # ==================================
 # display用データAPI
 # ==================================
