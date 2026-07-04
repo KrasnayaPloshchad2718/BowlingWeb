@@ -1,68 +1,23 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bowling Result</title>
-
-    <link rel="stylesheet" href="/static/result.css">
+    <title>Result</title>
+    <link rel="stylesheet" href="/static/results.css">
 </head>
 
 <body>
 
-    <div class="background"></div>
+<div class="container">
 
-    <header>
-        <h1>BOWLING RESULT</h1>
-        <p class="subtitle">★ American Diner Score Card ★</p>
-    </header>
+    <canvas id="canvas" width="1080" height="1080"></canvas>
 
-    <main class="card">
+    <img id="preview" />
 
-        <section class="score-box">
+    <button onclick="share()">共有</button>
 
-            <h2>RESULT</h2>
+</div>
 
-            <div class="info">
-                <div>TEAM</div>
-                <div class="value">{{ data.team }}</div>
-            </div>
-
-            <div class="info">
-                <div>SCORE</div>
-                <div class="value">{{ data.score }}</div>
-            </div>
-
-        </section>
-
-        <section class="share">
-
-            <h2>SHARE</h2>
-
-            <button onclick="copyText()">📋 コピー</button>
-
-            <button onclick="downloadImage()">📸 画像生成</button>
-
-            <a id="igLink" target="_blank">📱 Instagramを開く</a>
-
-            <div id="qr"></div>
-
-        </section>
-
-    </main>
-
-    <footer>
-        Bowling Challenge System
-    </footer>
-
-    <script>
-        const TEAM = "{{ data.team }}";
-        const SCORE = "{{ data.score }}";
-    </script>
-
-    <script src="/static/result.js"></script>
-
+<script src="/static/results.js"></script>
 </body>
-
 </html>
