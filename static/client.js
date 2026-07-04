@@ -359,7 +359,9 @@ async function calcSum() {
 
     const odai = currentIndexes.map(i => OdaiList[i]);
     await sendScore(odai, total);
+    sendResult(total);
 }
+
 
 // =====================================
 // 計算ボタン登録
@@ -371,4 +373,37 @@ document
         "click",
         calcSum
     );
+//======================================
+//QRとか
+//======================================
+function sendResult(total) {
+
+    fetch("/create_result", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            team: document.getElementById("team").value,
+            score: total
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        const url =
+            window.location.origin + data.url;
+
+        const qr = document.getElementById("qr");
+        qr.innerHTML = "";
+
+        new QRCode(qr, {
+            text: url,
+            width: 180,
+            height: 180
+        });
+
+        alert("結果URL生成:\n" + url);
+    });
+}
 
