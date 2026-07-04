@@ -237,6 +237,50 @@ document
 // 合計計算（Tkinter版と完全一致）
 // =====================================
 
+//======================================
+//QRとか
+//======================================
+function sendResult(total) {
+
+    fetch("/create_result", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            team: document.getElementById("team").value,
+            score: total
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        console.log("create_result:", data);
+
+        if (!data.id) {
+            alert("IDが返ってきていません");
+            return;
+        }
+
+        const url = `${window.location.origin}/results/${data.id}`;
+
+        const qr = document.getElementById("qr");
+        qr.innerHTML = "";
+
+        new QRCode(qr, {
+            text: url,
+            width: 180,
+            height: 180
+        });
+
+        alert("結果URL生成:\n" + url);
+    })
+    .catch(error => {
+        console.error(error);
+        alert("QR生成に失敗しました");
+    });
+}
+
 // =====================================
 // 合計計算（お題ごとの独立計算・修正版）
 // =====================================
@@ -373,47 +417,3 @@ document
         "click",
         calcSum
     );
-//======================================
-//QRとか
-//======================================
-function sendResult(total) {
-
-    fetch("/create_result", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            team: document.getElementById("team").value,
-            score: total
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-
-    console.log("create_result:", data);
-
-    if (!data.id) {
-        alert("IDが返ってきていません");
-        return;
-    }
-
-    const url = `${window.location.origin}/results/${data.id}`;
-
-    const qr = document.getElementById("qr");
-    qr.innerHTML = "";
-
-    new QRCode(qr, {
-        text: url,
-        width: 180,
-        height: 180
-    });
-
-    alert("結果URL生成:\n" + url);
-});
-    .catch(error => {
-        console.error(error);
-        alert("QR生成に失敗しました");
-    });
-
-}
