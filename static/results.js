@@ -2,7 +2,24 @@
 // results.js 1/3（完全再設計版）
 // 高解像度・座標系・データ確定
 //=====================================
+function share() {
 
+    const url = window.location.href;
+
+    if (navigator.share) {
+
+        navigator.share({
+            title: "Bowling Result",
+            text: "スコア結果",
+            url: url
+        }).catch(err => {
+            console.log("share error:", err);
+        });
+
+    } else {
+        alert("この端末は共有非対応");
+    }
+}
 
 //=========================
 // 基本設定
