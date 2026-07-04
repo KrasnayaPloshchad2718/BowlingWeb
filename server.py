@@ -163,6 +163,21 @@ def logout():
 def redirect_page():
     return render_template("redirect.html")
 
+@app.route("/results/<rid>")
+def results_page(rid):
+
+    data = results.get(rid)
+
+    if not data:
+        return "Not Found", 404
+
+    return render_template(
+        "results.html",
+        team=data["team"],
+        score=data["score"],
+        rid=rid
+    )
+
 # ==================================
 # QR用結果作成
 # ==================================
