@@ -162,11 +162,8 @@ def logout():
 @app.route("/redirect")
 def redirect_page():
     return render_template("redirect.html")
-
 @app.route("/results/<result_id>")
 def results_page(result_id):
-
-    results = load_results()
 
     data = results.get(result_id)
 
@@ -175,9 +172,9 @@ def results_page(result_id):
 
     return render_template(
         "results.html",
-        data=data,
-        result_id=result_id
+        data=data
     )
+
 # ==================================
 # QR用結果作成
 # ==================================
