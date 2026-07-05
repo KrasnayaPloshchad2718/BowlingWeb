@@ -7,52 +7,36 @@ let ValueList = [];
 
 let currentIndexes = [];
 
+// ★追加: 達成不可能（トグル状態）を管理するフラグ（trueで0点扱い）
+let isSkipped = { A: false, B: false, C: false };
+
 
 // =====================================
 // 設定取得
 // =====================================
 
 async function updateConfig() {
-
     try {
-
         const response = await fetch("/config");
-
         if (!response.ok) {
-
             setStatus("設定取得失敗", "red");
-
             return false;
-
         }
-
         const data = await response.json();
-
         OdaiList = data.odai;
         ValueList = data.value;
 
         if (OdaiList.length !== ValueList.length) {
-
             setStatus("設定データ異常", "red");
-
             return false;
-
         }
-
         setStatus("設定同期完了", "green");
-
         return true;
-
     }
-
     catch (e) {
-
         setStatus("サーバーへ接続できません", "red");
-
         return false;
-
     }
-
 }
 
 
@@ -60,60 +44,32 @@ async function updateConfig() {
 // 得点送信
 // =====================================
 
-async function sendScore(
-    odai,
-    score,
-    weight = null
-) {
-
-    const team =
-        Number(document.getElementById("team").value);
-
+async function sendScore(odai, score, weight = null) {
+    const team = Number(document.getElementById("team").value);
     try {
-
         const response = await fetch("/score", {
-
             method: "POST",
-
             headers: {
-
                 "Content-Type": "application/json"
-
             },
             body: JSON.stringify({
-        
-            team: team,
-        
-            odai: odai,
-        
-            weight: weight,
-        
-            score: score
-        
-        })
-
+                team: team,
+                odai: odai,
+                weight: weight,
+                score: score
+            })
         });
 
         if (response.ok) {
-
             setStatus("送信成功", "green");
-
         }
-
         else {
-
             setStatus("送信失敗", "red");
-
         }
-
     }
-
     catch (e) {
-
         setStatus("接続できません", "red");
-
     }
-
 }
 
 
@@ -122,27 +78,15 @@ async function sendScore(
 // =====================================
 
 function decideN() {
-
     let result = [];
-
     while (result.length < 3) {
-
-        const r = Math.floor(
-            Math.random() * OdaiList.length
-        );
-
+        const r = Math.floor(Math.random() * OdaiList.length);
         if (!result.includes(r)) {
-
             result.push(r);
-
         }
-
     }
-
     result.sort((a, b) => a - b);
-
     return result;
-
 }
 
 
@@ -151,14 +95,9 @@ function decideN() {
 // =====================================
 
 function setStatus(text, color) {
-
-    const label =
-        document.getElementById("status");
-
+    const label = document.getElementById("status");
     label.textContent = text;
-
     label.style.color = color;
-
 }
 
 
@@ -167,67 +106,58 @@ function setStatus(text, color) {
 // =====================================
 
 async function start() {
-
     const ok = await updateConfig();
-
     if (!ok) {
         return;
     }
 
     currentIndexes = decideN();
-
-    const result = currentIndexes.map(
-        i => OdaiList[i]
-    );
+    const result = currentIndexes.map(i => OdaiList[i]);
 
     // お題表示
-    document.getElementById("A").textContent =
-        "A：" + result[0];
-
-    document.getElementById("B").textContent =
-        "B：" + result[1];
-
-    document.getElementById("C").textContent =
-        "C：" + result[2];
+    document.getElementById("A").textContent = "A：" + result[0];
+    document.getElementById("B").textContent = "B：" + result[1];
+    document.getElementById("C").textContent = "C：" + result[2];
 
     // 入力欄初期化
     document.getElementById("scoreA").value = "";
     document.getElementById("scoreB").value = "";
     document.getElementById("scoreC").value = "";
+    
+    // 入力欄のdisabled状態も解除（★追加）
+    document.getElementById("scoreA").disabled = false;
+    document.getElementById("scoreB").disabled = false;
+    document.getElementById("scoreC").disabled = false;
 
     document.getElementById("declare").value = "";
-
     document.getElementById("total").textContent = "";
 
     setStatus("未送信", "blue");
 
+    // ★追加: 達成不可能トグルの状態を初期化（通常状態に戻す）
+    const keys = ["A", "B", "C"];
+    keys.forEach(key => {
+        isSkipped[key] = false;
+        const btn = document.getElementById("IsNotAchieved" + key);
+        if (btn) {
+            btn.style.background = "#00d4ff"; // 元のサイバーブルー
+            btn.style.color = "#111";
+            btn.textContent = "達成不可能"; // テキスト表記（お好みで変更してください）
+        }
+    });
+
     // 「倒す本数を宣言」の表示切替
     if (currentIndexes.includes(9)) {
-
-        document.getElementById(
-            "declareArea"
-        ).style.display = "block";
-
+        document.getElementById("declareArea").style.display = "block";
     }
     else {
-
-        document.getElementById(
-            "declareArea"
-        ).style.display = "none";
-
+        document.getElementById("declareArea").style.display = "none";
     }
 
-    const weights =
-    currentIndexes.map(
-        i => Number(ValueList[i])
-    );
+    const weights = currentIndexes.map(i => Number(ValueList[i]));
 
     // お題決定時に0点送信
-    await sendScore(
-        result,
-        0,
-        weights
-    );
+    await sendScore(result, 0, weights);
 
     // ★ 計算ボタンを有効化する
     document.getElementById("calcButton").disabled = false;
@@ -239,52 +169,30 @@ async function start() {
 // =====================================
 
 function sendResult(total) {
+    const lane = document.getElementById("team").value;
+    const odaiIndexes = currentIndexes.join(",");
 
-    const lane =
-        document.getElementById("team").value;
-
-    // 現在のodai番号（3つ）
-    const odaiIndexes =
-        currentIndexes.join(",");
-
-    const scoreA =
-        document.getElementById("scoreA").value;
-
-    const scoreB =
-        document.getElementById("scoreB").value;
-
-    const scoreC =
-        document.getElementById("scoreC").value;
+    const scoreA = document.getElementById("scoreA").value;
+    const scoreB = document.getElementById("scoreB").value;
+    const scoreC = document.getElementById("scoreC").value;
 
     const params = new URLSearchParams({
-
         lane: lane,
         score: total,
-
-        odai: odaiIndexes,   // ★ここが核心（文字排除）
-
+        odai: odaiIndexes,
         sa: scoreA,
         sb: scoreB,
         sc: scoreC
-
     });
 
-    const url =
-        window.location.origin +
-        "/results?" +
-        params.toString();
-
-    const qr =
-        document.getElementById("qr");
-
+    const url = window.location.origin + "/results?" + params.toString();
+    const qr = document.getElementById("qr");
     qr.innerHTML = "";
 
     new QRCode(qr, {
-
         text: url,
         width: 180,
         height: 180
-
     });
 
     console.log("QR URL:", url);
@@ -314,9 +222,17 @@ async function calcSum() {
     // 入力取得とバリデーション
     // =========================
     for (let i = 0; i < 3; i++) {
-        const box = document.getElementById("score" + keys[i]);
+        const key = keys[i];
+        const box = document.getElementById("score" + key);
         if (!box) {
             scores.push(0);
+            continue;
+        }
+
+        // ★修正: 達成不可能（有効時）は入力を無視して強制的に0点として扱う
+        if (isSkipped[key]) {
+            scores.push(0);
+            box.value = "0"; // 視覚的にも0にする
             continue;
         }
 
@@ -353,7 +269,8 @@ async function calcSum() {
         let weight = Number(ValueList?.[idx] ?? 0);
 
         // もしこのお題が「倒す本数を宣言（インデックス 9）」だった場合
-        if (idx === 9) {
+        // ★修正: ただし、インデックス9が「達成不可能」になっていない場合のみ宣言チェックを行う
+        if (idx === 9 && !isSkipped[keys[i]]) {
             const declareBox = document.getElementById("declare");
             
             if (!declareBox || declareBox.value.trim() === "") {
@@ -377,8 +294,6 @@ async function calcSum() {
             // 宣言と実際のスコアが一致した場合のみ、倍率（weight）を上書きする
             if (score === declared) {
                 if (declared === 0) {
-                    // 0本的中の場合、倍率ではなく「得点そのものに+10」する仕様だったため
-                    // ここで直接totalに10を足し、倍率(weight)は1のままにします
                     total += 10;
                     weight = 1; 
                 } else if (declared >= 1 && declared <= 6) {
@@ -389,9 +304,11 @@ async function calcSum() {
                     weight = 5;
                 }
             } else {
-                // 宣言が外れた場合は、お題自体の基本倍率（1倍）のまま計算
                 weight = 1;
             }
+        } else if (idx === 9 && isSkipped[keys[i]]) {
+            // インデックス9でかつ達成不可能が押されている場合は、一律で掛け算も0（スコア0 * 倍率1）
+            weight = 1;
         }
 
         // 各お題の「得点 × 倍率」を合計していく
@@ -402,12 +319,14 @@ async function calcSum() {
     // 最終計算（最後に一律10倍）
     // =========================
     total *= 10;
-
-    // JavaScriptの小数計算誤差を排除して整数化
     total = Math.round(total);
 
-    // ★ エラーなく計算が正常完了したため、計算ボタンを無効化する
+    // ★ 計算ボタンと達成不可能ボタンを一律無効化する（★修正）
     document.getElementById("calcButton").disabled = true;
+    keys.forEach(key => {
+        const btn = document.getElementById("IsNotAchieved" + key);
+        if (btn) btn.disabled = true;
+    });
 
     // =========================
     // 表示・送信
@@ -415,36 +334,56 @@ async function calcSum() {
     document.getElementById("total").textContent = "合計：" + total;
 
     const odai = currentIndexes.map(i => OdaiList[i]);
-
-    const weights =
-        currentIndexes.map(i => Number(ValueList[i]));
+    const weights = currentIndexes.map(i => Number(ValueList[i]));
     
-        await sendScore(
-        odai,
-        total,
-        weights
-    );
+    await sendScore(odai, total, weights);
     sendResult(total);
 }
+
+
+// =====================================
+// ★追加: 達成不可能ボタンのトグルイベント登録
+// =====================================
+function toggleAchieved(key) {
+    const btn = document.getElementById("IsNotAchieved" + key);
+    const box = document.getElementById("score" + key);
+    if (!btn) return;
+
+    // トグル状態を反転
+    isSkipped[key] = !isSkipped[key];
+
+    if (isSkipped[key]) {
+        // 【有効（グレー）状態】
+        btn.style.background = "#444"; // ダークグレー
+        btn.style.color = "#888";
+        box.value = "0";             // 入力を0にする
+        box.disabled = true;         // 入力不可にする
+    } else {
+        // 【無効（通常ボタン）状態】
+        btn.style.background = "#00d4ff"; // サイバーブルーに戻す
+        btn.style.color = "#111";
+        box.value = "";              // 入力を空にして再入力を促す
+        box.disabled = false;        // 入力可能にする
+    }
+}
+
+// A, B, Cそれぞれのボタンにイベントを設定
+["A", "B", "C"].forEach(key => {
+    const btn = document.getElementById("IsNotAchieved" + key);
+    if (btn) {
+        btn.addEventListener("click", () => toggleAchieved(key));
+    }
+});
 
 
 // =====================================
 // ボタン登録と初期状態設定
 // =====================================
 
-document
-    .getElementById("startButton")
-    .addEventListener(
-        "click",
-        start
-    );
+document.getElementById("startButton").addEventListener("click", start);
 
 const calcButton = document.getElementById("calcButton");
+calcButton.addEventListener("click", calcSum);
 
-calcButton.addEventListener(
-    "click",
-    calcSum
-);
-
-// ★ 画面起動時はまだ開始されていないので、計算ボタンをはじめから無効（グレーアウト）にしておく
+// ★ 画面起動時はまだ開始されていないので、計算ボタンをはじめから無効化しておく
 calcButton.disabled = true;
