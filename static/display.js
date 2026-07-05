@@ -3,31 +3,19 @@ let rankingData = [];
 const lastLaneData = {};
 
 // ==============================
-// ステータス表示
+// ステータス（存在すれば更新）
 // ==============================
 
 function setStatus(text, color) {
-    const label = document.getElementById("status");
-    if (!label) return;
+    const el = document.getElementById("status");
+    if (!el) return;
 
-    label.textContent = text;
-    label.style.color = color;
+    el.textContent = text;
+    el.style.color = color;
 }
 
 // ==============================
-// 難易度バー（既存HTMLの.fill前提）
-// ==============================
-
-function setDifficulty(value) {
-    const fill = document.querySelector(".fill");
-    if (!fill) return;
-
-    const v = Math.max(0, Math.min(100, value));
-    fill.style.width = v + "%";
-}
-
-// ==============================
-// サーバー取得
+// データ取得
 // ==============================
 
 async function fetchScore() {
@@ -46,7 +34,7 @@ async function fetchScore() {
 
         updateDisplay(laneData, rankingData);
 
-        setStatus("更新中", "green");
+        setStatus("更新中", "#4cff4c");
     }
     catch (e) {
         console.error(e);
@@ -78,22 +66,25 @@ function getWeightColor(weight) {
 }
 
 // ==============================
-// 画面更新（HTML完全準拠）
+// 描画更新（HTML完全一致版）
 // ==============================
 
 function updateDisplay(lanes, ranking) {
 
-    const lanesContainer = document.querySelector(".lanes");
-    if (!lanesContainer) return;
+    const container = document.getElementById("lanes");
+    if (!container) return;
 
-    lanesContainer.innerHTML = "";
+    container.innerHTML = "";
 
     lanes.forEach(lane => {
 
+        // ----------------------
+        // 初期化
+        // ----------------------
         if (!lastLaneData[lane.team]) {
             lastLaneData[lane.team] = {
                 odai: ["", "", ""],
-                weight: null,
+                weight: [1, 1, 1],
                 score: 0
             };
         }
@@ -116,75 +107,89 @@ function updateDisplay(lanes, ranking) {
             ? last.weight
             : [1, 1, 1];
 
-        // ======================
-        // HTML構造そのまま再現
-        // ======================
-
-        const row = document.createElement("div");
-        row.className = "lane-row";
+        // =========================
+        // lane本体（HTML準拠）
+        // =========================
 
         const laneDiv = document.createElement("div");
         laneDiv.className = "lane";
 
-        laneDiv.innerHTML = `<p>LANE ${lane.team}</p>`;
+        // 左側
+        const left = document.createElement("div");
+        left.className = "lane-left";
 
-        // レーンクリック処理（軽く維持）
+        left.innerHTML = `
+            <h2>LANE ${lane.team}</h2>
+
+            <div class="odai">
+                <span class="label">お題：</span>
+                <div class="odaiList"></div>
+            </div>
+
+            <div class="scoreBox">
+                <div class="scoreLabel">スコア：</div>
+                <div class="score">${last.score}</div>
+            </div>
+        `;
+
+        // お題描画
+        const odaiList = left.querySelector(".odaiList");
+
+        last.odai.forEach((text, i) => {
+            const span = document.createElement("span");
+            span.textContent = text;
+            span.style.color = getWeightColor(weights[i]);
+            odaiList.appendChild(span);
+        });
+
+        // スコア色付け
+        const scoreEl = left.querySelector(".score");
+
+        scoreEl.classList.remove("low", "middle", "high");
+
+        if (last.score <= 500) {
+            scoreEl.classList.add("low");
+        } else if (last.score <= 1000) {
+            scoreEl.classList.add("middle");
+        } else {
+            scoreEl.classList.add("high");
+        }
+
+        // 右側（難易度バー：1本だけ表示）
+        const right = document.createElement("div");
+        right.className = "lane-right";
+
+        right.innerHTML = `
+            <div class="difficulty">
+                <div class="left">易</div>
+                <div class="right">難</div>
+            </div>
+        `;
+
+        // laneクリック（軽いスコア変化）
         laneDiv.addEventListener("click", () => {
             last.score += 10;
-            setStatus(`Lane ${lane.team} +10`, "white");
             updateDisplay(lanes, ranking);
         });
 
-        // レーン1右パネル（HTML仕様通り）
-        if (lane.team === 1) {
+        // 組み立て
+        laneDiv.appendChild(left);
+        laneDiv.appendChild(right);
 
-            const info = document.createElement("aside");
-            info.className = "lane-info";
-
-            info.innerHTML = `
-                <div class="panel">
-                    <h3>レーン1情報</h3>
-                    <p>スコア：${last.score}</p>
-                </div>
-            `;
-
-            row.appendChild(laneDiv);
-            row.appendChild(info);
-
-        } else {
-            row.appendChild(laneDiv);
-        }
-
-        lanesContainer.appendChild(row);
+        container.appendChild(laneDiv);
     });
 
-    // ======================
-    // ランキング（HTML準拠）
-    // ======================
+    // =========================
+    // ランキング（完全対応）
+    // =========================
 
-    const ol = document.querySelector(".ranking ol");
-    if (ol) {
-        ol.innerHTML = "";
+    const r1 = document.getElementById("scoreRank1");
+    const r2 = document.getElementById("scoreRank2");
+    const r3 = document.getElementById("scoreRank3");
 
-        ranking.slice(0, 3).forEach((r, i) => {
-            const li = document.createElement("li");
-            li.textContent = `${i + 1}位 ${r}`;
-            ol.appendChild(li);
-        });
-    }
-}
-
-// ==============================
-// 掲示板（そのまま使用）
-// ==============================
-
-function postMessage(text) {
-    const board = document.querySelector(".board-content");
-    if (!board) return;
-
-    const p = document.createElement("p");
-    p.textContent = text;
-    board.appendChild(p);
+    if (r1) r1.textContent = ranking[0] ?? "---";
+    if (r2) r2.textContent = ranking[1] ?? "---";
+    if (r3) r3.textContent = ranking[2] ?? "---";
 }
 
 // ==============================
