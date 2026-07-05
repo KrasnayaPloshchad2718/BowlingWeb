@@ -308,7 +308,7 @@ function sendResult(total) {
 // =====================================
 
 async function calcSum() {
-
+    const usedWeights = [];
     if (!Array.isArray(currentIndexes) || currentIndexes.length !== 3) {
         document.getElementById("total").textContent = "先に開始";
         return;
