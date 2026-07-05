@@ -203,7 +203,7 @@ async function updateDisplay() {
                 </div>
 
                 <div class="score">
-                    ${lane.score}
+                    スコア：${displayData.score}
                 </div>
 
             `;
@@ -258,7 +258,7 @@ async function updateDisplay() {
                 "high"
             );
 
-            if (lane.score <= 500) {
+            if (displayData.score <= 500) {
 
                 score.classList.add(
                     "low"
@@ -267,7 +267,7 @@ async function updateDisplay() {
             }
 
             else if (
-                lane.score <= 1000
+                displayData.score <= 1000
             ) {
 
                 score.classList.add(
