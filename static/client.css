@@ -458,3 +458,27 @@ button:disabled {
     border: 4px solid #fff;
     border-radius: 8px;
 }
+
+/* =========================
+   未達成ボタンを横並びにする修正
+========================= */
+
+/* .odaiRowの中にあるボタンだけ設定をリセット＆上書き */
+.odaiRow button.toggle-btn {
+    display: inline-block; /* ブロック化を解除して横並びに */
+    margin: 0;             /* 中央寄せのマージンをリセット */
+    padding: 8px 16px;     /* 横並びに適したコンパクトなサイズに */
+    font-size: 16px;       /* 入力欄と高さを合わせるために少し調整 */
+    white-space: nowrap;   /* ボタン内の文字が絶対に改行されないようにする */
+    background: #00d4ff;   /* 初期カラーはサイバーブルー */
+    color: #111;
+}
+
+/* JavaScriptでグレーアウト（無効化）された時の見た目 */
+button:disabled,
+.odaiRow button.toggle-btn:disabled {
+    background: #444 !important;
+    color: #888 !important;
+    cursor: not-allowed;
+    transform: none !important;
+}
