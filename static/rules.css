@@ -349,6 +349,61 @@ main{
    カード
 ===================================== */
 
+/* =====================================
+   目次カード（Index）
+===================================== */
+
+/* 目次用の特別なカード設定（必要に応じて幅を調整できます） */
+.toc-card {
+    /* 必要であれば main 内での配置調整用（デフォルトのままでも綺麗に並びます） */
+}
+
+/* 目次リスト全体の枠 */
+.toc-list {
+    list-style: none; /* デフォルトのドットを消す */
+    padding-left: 0 !important; /* カード共通のpaddingリセット */
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px; /* リンク同士の間隔 */
+}
+
+/* 目次の各項目 */
+.toc-list li {
+    margin: 0 !important; /* カード共通のmarginリセット */
+}
+
+/* 目次のリンク（ボタン風のデザイン） */
+.toc-list a {
+    display: block;
+    padding: 14px 20px;
+    background: #fff8ef; /* FAQの回答欄と同じ、温かみのあるクリーム色 */
+    color: #222;
+    font-size: 22px;
+    font-weight: bold;
+    text-decoration: none;
+    border: 3px solid #b40000; /* ダイナー風の赤枠 */
+    border-radius: 12px;
+    transition: all .25s ease;
+}
+
+/* マウスホバー・指が触れたときの動き（ナビゲーションの動きを踏襲） */
+.toc-list a:hover {
+    background: #b40000; /* 背景が赤に */
+    color: white;       /* 文字が白に */
+    transform: translateX(8px); /* アメリカンポップな感じで右にスライド */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+
+/* --- レスポンシブ対応 --- */
+@media (max-width: 700px) {
+    .toc-list a {
+        font-size: 18px; /* スマホ画面では文字サイズを少し小さく */
+        padding: 12px 16px;
+    }
+}
+
 .card{
 
     background:white;
