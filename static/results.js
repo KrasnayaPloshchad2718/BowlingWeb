@@ -249,7 +249,7 @@ function drawOdai() {
     ctx.stroke();
 
     // お題リスト
-    ctx.font = "bold 24px Arial";
+    ctx.font = "bold 36px Arial";
 
     for (let i = 0; i < 3; i++) {
         // テキスト（ダークグレーで視認性確保）
@@ -260,7 +260,7 @@ function drawOdai() {
         // スコア（アメリカンポップなブルーに変更）
         ctx.textAlign = "right";
         ctx.fillStyle = "#0044cc";
-        ctx.fillText(data.scores[i] || "0", 930, 735 + i * 55);
+        ctx.fillText(data.scores[i]+"本" || "0", 930, 735 + i * 55);
     }
     ctx.restore();
 }
@@ -384,7 +384,7 @@ function drawFooter() {
     ctx.textAlign = "center";
     ctx.fillStyle = "#ffe082"; // アメリカンゴールド
     ctx.font = "bold 18px 'Trebuchet MS', Arial";
-    ctx.fillText("★ American Diner Bowling System ★", W / 2, H - 40);
+    ctx.fillText("★ American Diner  ★", W / 2, H - 40);
     ctx.restore();
 }
 
@@ -396,6 +396,6 @@ function render() {
     drawTitle();
     drawScore();
     drawOdai();
-    drawPins(); // ここで上記で定義した2本のリアルピンが描画されます
+    //drawPins(); // ここで上記で定義した2本のリアルピンが描画されます
     drawFooter();
 }
