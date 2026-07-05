@@ -142,7 +142,7 @@ async function start() {
         if (btn) {
             btn.style.background = "#00d4ff"; // 元のサイバーブルー
             btn.style.color = "#111";
-            btn.textContent = "達成不可能"; // テキスト表記（お好みで変更してください）
+            btn.textContent = "未達成"; // テキスト表記（お好みで変更してください）
         }
     });
 
