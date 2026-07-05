@@ -265,7 +265,7 @@ function drawOdai() {
 
         ctx.textAlign = "right";
         ctx.fillStyle = "#ffd000";
-        ctx.fillText(data.scores[i] || "", 940, 670 + i * 55);
+        ctx.fillText(data.scores[i] +"/10"|| "", 940, 670 + i * 55);
 
         ctx.textAlign = "left";
     }
