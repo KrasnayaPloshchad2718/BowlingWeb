@@ -239,3 +239,39 @@ main {
     color: #666;
     letter-spacing: 1px;
 }
+
+/* ==============================================
+   5. ニュース掲示板のスタイル
+   ============================================== */
+.news-board {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.6);        /* 背景を少し暗くして文字を引き立てる */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 10px 15px;
+    margin: 15px 0;                        /* 前後の余白 */
+    font-family: monospace;
+}
+
+/* 「NEWS」という見出しラベル */
+.news-label {
+    background: #ff3b30;                   /* 目立つ赤色のアクセント */
+    color: #fff;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-right: 15px;
+    letter-spacing: 1px;
+}
+
+/* サーバーから取得した文字を表示するエリア */
+.news-content {
+    color: #ffffff;
+    font-size: 20px;                       /* お題(18px)より一回り大きくして目立たせる */
+    font-weight: bold;
+    white-space: pre-wrap;                 /* サーバー側で改行があればそのまま改行する */
+    word-break: break-all;
+    flex: 1;
+}
