@@ -3,7 +3,7 @@ let rankingData = [];
 const lastLaneData = {};
 
 // ==============================
-// ステータス（存在すれば更新）
+// ステータス表示（任意）
 // ==============================
 
 function setStatus(text, color) {
@@ -15,7 +15,7 @@ function setStatus(text, color) {
 }
 
 // ==============================
-// データ取得
+// データ取得のみ
 // ==============================
 
 async function fetchScore() {
@@ -43,7 +43,7 @@ async function fetchScore() {
 }
 
 // ==============================
-// 色計算（そのまま維持）
+// 色計算（表示専用）
 // ==============================
 
 function getWeightColor(weight) {
@@ -54,19 +54,15 @@ function getWeightColor(weight) {
     let t = Math.log(weight) / Math.log(max);
     t = Math.max(0, Math.min(1, t));
 
-    let hue;
-
-    if (t < 0.75) {
-        hue = 120 - 120 * (t / 0.75);
-    } else {
-        hue = 360 - 60 * ((t - 0.75) / 0.25);
-    }
+    let hue = (t < 0.75)
+        ? 120 - 120 * (t / 0.75)
+        : 360 - 60 * ((t - 0.75) / 0.25);
 
     return `hsl(${hue},100%,55%)`;
 }
 
 // ==============================
-// 描画更新（HTML完全一致版）
+// 描画（完全モニター専用）
 // ==============================
 
 function updateDisplay(lanes, ranking) {
@@ -78,9 +74,6 @@ function updateDisplay(lanes, ranking) {
 
     lanes.forEach(lane => {
 
-        // ----------------------
-        // 初期化
-        // ----------------------
         if (!lastLaneData[lane.team]) {
             lastLaneData[lane.team] = {
                 odai: ["", "", ""],
@@ -108,13 +101,12 @@ function updateDisplay(lanes, ranking) {
             : [1, 1, 1];
 
         // =========================
-        // lane本体（HTML準拠）
+        // レーン描画（操作なし）
         // =========================
 
         const laneDiv = document.createElement("div");
         laneDiv.className = "lane";
 
-        // 左側
         const left = document.createElement("div");
         left.className = "lane-left";
 
@@ -132,7 +124,6 @@ function updateDisplay(lanes, ranking) {
             </div>
         `;
 
-        // お題描画
         const odaiList = left.querySelector(".odaiList");
 
         last.odai.forEach((text, i) => {
@@ -142,20 +133,6 @@ function updateDisplay(lanes, ranking) {
             odaiList.appendChild(span);
         });
 
-        // スコア色付け
-        const scoreEl = left.querySelector(".score");
-
-        scoreEl.classList.remove("low", "middle", "high");
-
-        if (last.score <= 500) {
-            scoreEl.classList.add("low");
-        } else if (last.score <= 1000) {
-            scoreEl.classList.add("middle");
-        } else {
-            scoreEl.classList.add("high");
-        }
-
-        // 右側（難易度バー：1本だけ表示）
         const right = document.createElement("div");
         right.className = "lane-right";
 
@@ -166,13 +143,6 @@ function updateDisplay(lanes, ranking) {
             </div>
         `;
 
-        // laneクリック（軽いスコア変化）
-        laneDiv.addEventListener("click", () => {
-            last.score += 10;
-            updateDisplay(lanes, ranking);
-        });
-
-        // 組み立て
         laneDiv.appendChild(left);
         laneDiv.appendChild(right);
 
@@ -180,7 +150,7 @@ function updateDisplay(lanes, ranking) {
     });
 
     // =========================
-    // ランキング（完全対応）
+    // ランキング表示のみ
     // =========================
 
     const r1 = document.getElementById("scoreRank1");
@@ -193,7 +163,7 @@ function updateDisplay(lanes, ranking) {
 }
 
 // ==============================
-// 起動
+// 起動（完全監視モード）
 // ==============================
 
 function startDisplay() {
