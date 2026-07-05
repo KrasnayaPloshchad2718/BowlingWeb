@@ -162,7 +162,7 @@ main {
    3. 【お好みで】LANEの文字も負けないように微調整
    ============================================== */
 .lane h2 {
-    font-size: 18px; /* 16px から 18px に変更 */
+    font-size: 20px; /* 16px から 18px に変更 */
     color: #00ff66;
     min-width: 85px; /* 文字が大きくなった分、幅を少し確保 */
 }
@@ -173,7 +173,7 @@ main {
 
 /* スコア（文字サイズを適正化） */
 .score {
-    font-size: 28px;
+    font-size: 36px;
     font-weight: bold;
     font-family: monospace;
     text-align: right;
@@ -184,7 +184,7 @@ main {
 .high { color: #ff4c8b; }
 
 /* =========================
-   掲示板（レーンと高さを完全に合わせる）
+   掲示板（レーンと高さを完全に合わせる）“
 ========================= */
 #board {
     flex: 1.2;
