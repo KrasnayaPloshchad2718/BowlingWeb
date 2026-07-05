@@ -97,7 +97,7 @@ def login():
     """ログインページを表示"""
     # すでにログイン済みの場合は、そのまま管理画面等へスキップさせる処理
     if session.get("login"):
-        return redirect(url_for("administrator"))
+        return redirect(url_for("client.html"))
     return render_template("login.html")
 
 
