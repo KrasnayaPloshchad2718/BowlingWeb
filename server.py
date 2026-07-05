@@ -190,14 +190,14 @@ def score():
             "result": "error"
 
         }), 400
-
+    weights = data.get("weight", [1, 1, 1])
     teams[team]["odai"] = data["odai"]
 
     teams[team]["weight"] = weights
     
     teams[team]["score"] = int(data["score"])
-
-    weights = data.get("weight", [1, 1, 1])
+    
+    
 
     if int(data["score"]) > 0:
 
