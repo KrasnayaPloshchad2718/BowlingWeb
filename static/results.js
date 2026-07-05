@@ -267,78 +267,94 @@ function drawOdai() {
 
 //=====================================
 // results.js 3/3
-// ピン単体・強視認・最終統合
+// リアルピン造形・2本限定配置・最終統合
 //=====================================
 
-// 元のコードにあった2パターンのピン描画、および drawPins() の定義を引き継ぎつつ、
-// 色味をアイボリーホワイト(#f8f5ee)とダイナーレッド(#b40000)に統一してリファインします。
-
-function drawSimplePin(x, y) {
+//=========================
+// リアルなボウリングピンの描画
+//=========================
+function drawRealPin(x, y, scale = 1.0) {
     ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
 
+    // 1. ピン全体の影（右下に少し落とす）
     ctx.shadowColor = "rgba(0,0,0,0.4)";
-    ctx.shadowBlur = 8;
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetX = 5;
+    ctx.shadowOffsetY = 8;
 
-    ctx.fillStyle = "#f8f5ee"; // ダイナー風アイボリー
-    ctx.strokeStyle = "#222222";
-    ctx.lineWidth = 3;
-
-    // 体
+    // 2. ピンの輪郭パス（頭からお腹、底面にかけてのなめらかな曲線）
     ctx.beginPath();
-    ctx.ellipse(x + 20, y + 60, 18, 55, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
+    // 頭（トップ）
+    ctx.arc(0, -65, 16, Math.PI * 1.1, Math.PI * -0.1, false);
+    // 首のくびれへの絞り
+    ctx.bezierCurveTo(12, -45, 8, -35, 10, -20);
+    // お腹（最大に膨らむ部分）
+    ctx.bezierCurveTo(14, 0, 26, 20, 26, 45);
+    // 底面の角丸
+    ctx.quadraticCurveTo(26, 65, 18, 65);
+    // 底辺
+    ctx.lineTo(-18, 65);
+    // 左側の底面角丸
+    ctx.quadraticCurveTo(-26, 65, -26, 45);
+    // 左側のお腹の膨らみ
+    ctx.bezierCurveTo(-26, 20, -14, 0, -10, -20);
+    // 左側の首のくびれ
+    ctx.bezierCurveTo(-8, -35, -12, -45, -16, -65);
+    ctx.closePath();
 
-    // 赤ライン
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = "#b40000"; // ダイナー赤
-    ctx.fillRect(x + 5, y + 55, 30, 10);
-
-    // 頭
-    ctx.beginPath();
-    ctx.arc(x + 20, y + 10, 18, 0, Math.PI * 2);
+    // アイボリーホワイトで塗りつぶし ＆ 太めの輪郭線
     ctx.fillStyle = "#f8f5ee";
     ctx.fill();
+    
+    ctx.shadowColor = "transparent"; // 線に影がつかないようリセット
+    ctx.strokeStyle = "#222222";
+    ctx.lineWidth = 4.5;
     ctx.stroke();
 
-    ctx.restore();
-}
-
-function drawPin(x, y) {
+    // 3. 首元の赤いライン（通常のボウリングピンの象徴的な仕様）
+    // ピンの輪郭内にクリッピングして綺麗に収める
     ctx.save();
-
-    ctx.shadowColor = "rgba(0,0,0,0.5)";
-    ctx.shadowBlur = 10;
-
-    ctx.fillStyle = "#f8f5ee";
-    ctx.strokeStyle = "#222222";
-    ctx.lineWidth = 4;
-
-    roundRect(x, y, 55, 130, 14, true, true);
-
-    ctx.shadowBlur = 0;
-
+    ctx.clip(); 
     ctx.fillStyle = "#b40000";
-    ctx.fillRect(x, y + 35, 55, 14);
-    ctx.fillRect(x, y + 62, 55, 14);
+    // 首の位置に1本の太い赤ライン
+    ctx.fillRect(-30, -40, 60, 14);
+    ctx.restore();
 
-    ctx.beginPath();
-    ctx.arc(x + 27, y - 8, 22, 0, Math.PI * 2);
-    ctx.fillStyle = "#f8f5ee";
-    ctx.fill();
-    ctx.stroke();
+    // 4. ピン表面の立体感を出すハイライト（うっすらと左側に白を乗せる）
+    ctx.save();
+    ctx.clip();
+    const grad = ctx.createLinearGradient(-25, 0, 25, 0);
+    grad.addColorStop(0, "rgba(255,255,255,0.4)");
+    grad.addColorStop(0.3, "rgba(255,255,255,0.0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(-30, -80, 60, 150);
+    ctx.restore();
 
     ctx.restore();
 }
 
-// 空白だったピンの並び処理を、元コードの構成を崩さない範囲でシンプルに配置
+//=========================
+// ピンの配置（厳選された2本）
+//=========================
 function drawPins() {
-    // お題枠の下（y=940付近）に、可愛いピンのデコレーションを並べます
-    const startX = W / 2 - 140;
-    const y = 960;
-    for (let i = 0; i < 4; i++) {
-        drawSimplePin(startX + i * 80, y);
-    }
+    // お題ボードの下、中央のTOTAL SCOREの下あたりの左右に
+    // どっしりとしたリアルなピンを2本、ハの字（または少し角度をつけて）配置します。
+    
+    // 左側のピン（少し左に傾ける）
+    ctx.save();
+    ctx.translate(W / 2 - 180, 1040);
+    ctx.rotate(-0.08); // 約-5度回転
+    drawRealPin(0, 0, 1.1); // スケールを1.1倍にして存在感を出す
+    ctx.restore();
+
+    // 右側のピン（少し右に傾ける）
+    ctx.save();
+    ctx.translate(W / 2 + 180, 1040);
+    ctx.rotate(0.08);  // 約5度回転
+    drawRealPin(0, 0, 1.1);
+    ctx.restore();
 }
 
 //=========================
@@ -366,9 +382,8 @@ function roundRect(x, y, w, h, r, fill, stroke) {
 function drawFooter() {
     ctx.save();
     ctx.textAlign = "center";
-    ctx.fillStyle = "#ffe082"; // ゴールド
+    ctx.fillStyle = "#ffe082"; // アメリカンゴールド
     ctx.font = "bold 18px 'Trebuchet MS', Arial";
-
     ctx.fillText("★ American Diner Bowling System ★", W / 2, H - 40);
     ctx.restore();
 }
@@ -381,6 +396,6 @@ function render() {
     drawTitle();
     drawScore();
     drawOdai();
-    drawPins();
+    drawPins(); // ここで上記で定義した2本のリアルピンが描画されます
     drawFooter();
 }
