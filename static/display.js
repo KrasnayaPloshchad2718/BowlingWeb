@@ -305,13 +305,13 @@ async function updateDisplay() {
         // ==========================
 
         document.getElementById("scoreRank1").textContent =
-            data.ranking[0] ?? "---";
+            "1st" + data.ranking[0] ?? "---";
 
         document.getElementById("scoreRank2").textContent =
-            data.ranking[1] ?? "---";
+            "2nd" + data.ranking[1] ?? "---";
 
         document.getElementById("scoreRank3").textContent =
-            data.ranking[2] ?? "---";
+            "3rd" + data.ranking[2] ?? "---";
 
     }
 
