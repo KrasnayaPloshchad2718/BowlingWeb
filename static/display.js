@@ -189,9 +189,9 @@ function updateDisplay(lanes, ranking) {
         const r2 = document.getElementById("scoreRank2");
         const r3 = document.getElementById("scoreRank3");
 
-        if (r1) r1.textContent = ranking[0] ? `1st: LANE ${ranking[0].team} (${ranking[0].score})` : "1st: ---";
-        if (r2) r2.textContent = ranking[1] ? `2nd: LANE ${ranking[1].team} (${ranking[1].score})` : "2nd: ---";
-        if (r3) r3.textContent = ranking[2] ? `3rd: LANE ${ranking[2].team} (${ranking[2].score})` : "3rd: ---";
+        if (r1) r1.textContent = ranking[0] ? `1st: ${ranking[0].score}` : "1st: ---";
+        if (r2) r2.textContent = ranking[1] ? `2nd: ${ranking[1].score}` : "2nd: ---";
+        if (r3) r3.textContent = ranking[2] ? `3rd: ${ranking[2].score}` : "3rd: ---";
 
     }
     catch (e) {
