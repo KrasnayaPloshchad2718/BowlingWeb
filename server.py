@@ -75,8 +75,8 @@ LANE_COUNT = 4
 teams = {
     i: {
         "odai": ["", "", ""],
-        "weight": [1, 1, 1],
-        "score": 0
+        "weight": None,
+        "score": None
     }
     for i in range(1, LANE_COUNT + 1)
 }
@@ -281,8 +281,11 @@ def reset():
 
             "odai": ["", "", ""],
 
-            "score": 0
+            "weight":None
+            
+            "score": None
 
+            
         }
 
         for i in range(1, LANE_COUNT + 1)
