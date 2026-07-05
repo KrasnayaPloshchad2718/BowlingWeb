@@ -119,7 +119,7 @@ function parseParams() {
     const score = p.get("score");
 
     const odaiIndexes =
-        (params.get("odai") || "")
+        (p.get("odai") || "")
             .split(",")
             .map(Number);
     
