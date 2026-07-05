@@ -153,7 +153,7 @@ function updateDisplay(lanes, ranking) {
                     <span class="odaiList"></span>
                 </div>
                 <div class="score">
-                    スコア：${displayData.score}
+                    ${displayData.score}
                 </div>
             `;
 
