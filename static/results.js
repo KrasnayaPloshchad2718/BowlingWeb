@@ -1,3 +1,21 @@
+// =====================================
+// お題マスター
+// =====================================
+
+let OdaiList = [];
+
+async function loadConfig() {
+
+    const response =
+        await fetch("/config");
+
+    const data =
+        await response.json();
+
+    OdaiList = data.odai;
+
+}
+
 //=====================================
 // results.js 1/3（完全再設計版）
 // 高解像度・座標系・データ確定
@@ -60,14 +78,12 @@ let data = null;
 // 初期化
 //=========================
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
+
+    await loadConfig();
 
     canvas = document.getElementById("canvas");
     ctx = canvas.getContext("2d");
-
-    //=================================
-    // 超重要：画質崩壊防止（DPR固定）
-    //=================================
 
     const dpr = 2;
 
@@ -79,10 +95,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
     ctx.scale(dpr, dpr);
 
-    //=========================
-    // データ取得（URL統一）
-    //=========================
-
     data = parseParams();
 
     if (!data) {
@@ -91,6 +103,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     render();
+
 });
 
 
@@ -105,11 +118,25 @@ function parseParams() {
     const lane = p.get("lane");
     const score = p.get("score");
 
-    const odai = [
-        p.get("oa"),
-        p.get("ob"),
-        p.get("oc")
-    ];
+    const odaiIndexes =
+        (params.get("odai") || "")
+            .split(",")
+            .map(Number);
+    
+    const odai = odaiIndexes.map(index => {
+    
+        if (
+            index >= 0 &&
+            index < OdaiList.length
+        ) {
+    
+            return OdaiList[index];
+    
+        }
+    
+        return "不明";
+    
+    });
 
     const scores = [
         p.get("sa"),
