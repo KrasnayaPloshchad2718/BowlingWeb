@@ -200,12 +200,39 @@ function updateDisplay(lanes, ranking) {
 }
 
 // =====================================
+// 掲示板（ニュース）データの取得と反映
+// =====================================
+async function fetchNews() {
+    try {
+        const response = await fetch("/news");
+        if (!response.ok) {
+            console.error("ニュースの取得に失敗しました");
+            return;
+        }
+        
+        // サーバーから届いた生テキストをそのまま取得
+        const text = await response.text();
+        
+        const newsContent = document.getElementById("news-content");
+        if (newsContent) {
+            newsContent.textContent = text; // そのまま表示（エスケープ安全）
+        }
+    } catch (e) {
+        console.error("ニュース接続エラー:", e);
+    }
+}
+
+// =====================================
 // 定期更新開始
 // =====================================
 
 function startDisplay() {
     fetchScore();
-    setInterval(fetchScore, 3000);
+    fetchNews();
+    setInterval(() => {
+        fetchScore();
+        fetchNews();
+    }, 3000);
 }
 
 // =====================================
