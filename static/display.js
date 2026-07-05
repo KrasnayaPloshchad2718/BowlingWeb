@@ -60,7 +60,7 @@ async function fetchScore() {
 function getWeightColor(weight){
 
     const min = 1;
-    const max = 5;
+    const max = 8;
 
     let t =
         Math.log(weight) /
