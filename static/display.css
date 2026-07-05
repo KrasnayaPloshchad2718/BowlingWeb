@@ -1,102 +1,225 @@
+/* =========================
+   全体基本
+========================= */
+
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Arial", sans-serif;
 }
 
-/* 上部バー */
-.top-bar {
-  background: #222;
-  color: white;
-  padding: 10px;
+body {
+    background: #050505;
+    color: white;
+    overflow-x: hidden;
 }
 
-.difficulty {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* =========================
+   navスペース確保
+========================= */
+
+#topNav {
+    height: 60px;
+    width: 100%;
+    background: #0a0a0a;
+    border-bottom: 1px solid #222;
 }
 
-.bar {
-  width: 200px;
-  height: 10px;
-  background: #444;
-  border-radius: 5px;
-  overflow: hidden;
+/* =========================
+   メインレイアウト
+========================= */
+
+main {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
 }
 
-.fill {
-  height: 100%;
-  background: linear-gradient(90deg, #00ff99, #00aaff);
+/* =========================
+   レーン表示エリア
+========================= */
+
+#lanes {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
-/* メインレイアウト */
-.container {
-  display: flex;
-  height: 70vh;
-}
+/* =========================
+   レーンUI
+========================= */
 
-/* レーン */
-.lanes {
-  flex: 3;
-  padding: 10px;
-  background: #111;
-}
-
-.lane-row {
-  display: flex;
-  margin-bottom: 10px;
-}
-
-/* レーン本体 */
 .lane {
-  flex: 1;
-  height: 80px;
-  background: #333;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #555;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+
+    background: #0b0b0b;
+    border: 1px solid #222;
+    border-radius: 12px;
+
+    padding: 16px;
+    min-height: 140px;
 }
 
-/* レーン1の右情報 */
-.lane-info {
-  width: 180px;
-  margin-left: 10px;
+/* 左側（お題＋スコア） */
+.lane-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
-.panel {
-  background: #222;
-  color: white;
-  padding: 10px;
-  border: 1px solid #555;
+/* お題 */
+.odai {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #ccc;
 }
 
-/* サイドバー（ランキング） */
-.sidebar {
-  flex: 1;
-  background: #1a1a1a;
-  color: white;
-  padding: 10px;
-  border-left: 2px solid #333;
+.odaiList span {
+    display: block;
+    margin-top: 4px;
 }
 
-.ranking h2 {
-  margin-bottom: 10px;
+/* スコア */
+.score {
+    font-size: 48px;
+    font-weight: bold;
+    margin-top: 10px;
 }
 
-/* 掲示板（ランキングとは別） */
-.board {
-  background: #0d0d0d;
-  color: white;
-  padding: 10px;
-  border-top: 2px solid #333;
+/* 色段階 */
+.low { color: #4cff4c; }
+.middle { color: #ffd24c; }
+.high { color: #ff4c8b; }
+
+/* =========================
+   右側：難易度バー（1本だけ）
+========================= */
+
+.lane-right {
+    width: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.board-content {
-  margin-top: 5px;
-  padding: 10px;
-  background: #1c1c1c;
+/* バー本体 */
+.difficulty {
+    position: relative;
+    width: 220px;
+    height: 80px;
+    border-radius: 10px;
+
+    background: linear-gradient(
+        90deg,
+        #00ff66,
+        #2b6cff,
+        #a000ff
+    );
+
+    box-shadow: 0 0 10px rgba(0,0,0,0.6);
+}
+
+/* 易・難ラベル */
+.difficulty .left {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    color: #00ff66;
+}
+
+.difficulty .right {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    color: #a000ff;
+}
+
+/* 目盛り */
+.difficulty::after {
+    content: "";
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    top: 50%;
+
+    height: 2px;
+    background: rgba(255,255,255,0.6);
+}
+
+/* =========================
+   掲示板（完全独立）
+========================= */
+
+#board {
+    flex: 1;
+    background: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 12px;
+    min-height: 300px;
+}
+
+#board h2 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #aaa;
+}
+
+/* =========================
+   ランキング（完全分離）
+========================= */
+
+#ranking {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+
+    background: #0a0a0a;
+    border-top: 1px solid #222;
+
+    padding: 12px;
+}
+
+.rankBox {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#ranking .title {
+    font-weight: bold;
+    color: #aaa;
+}
+
+/* =========================
+   レスポンシブ
+========================= */
+
+@media (max-width: 900px) {
+
+    main {
+        flex-direction: column;
+    }
+
+    .lane {
+        flex-direction: column;
+    }
+
+    .lane-right {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .difficulty {
+        width: 100%;
+    }
 }
