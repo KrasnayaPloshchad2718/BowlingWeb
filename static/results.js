@@ -26,7 +26,7 @@ async function shareImage() {
             try {
 
                 await navigator.share({
-                    title: "Bowling Result",
+                    title: "",
                     text: "結果を共有します",
                     files: [file]   // ← これが画像共有
                 });
