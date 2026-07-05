@@ -110,48 +110,64 @@ async function updateDisplay() {
 
     try {
 
-        const response = await fetch("/display/data");
+        const response =
+            await fetch("/display/data");
 
         if (!response.ok) {
+
             return;
+
         }
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
-        const lanes = document.getElementById("lanes");
+        console.log(
+            "display/data",
+            data
+        );
+
+        const lanes =
+            document.getElementById("lanes");
 
         lanes.innerHTML = "";
 
         data.lanes.forEach(lane => {
 
             // ==========================
-            // 前回データ保持
+            // お題と倍率をセットで保持
             // ==========================
 
+            // ==========================
+            // お題と倍率をセットで保持
+            // ==========================
+            
             if (
                 Array.isArray(lane.odai) &&
-                lane.odai.some(text => text !== "")
+                lane.odai.some(text => text !== "") &&
+                Array.isArray(lane.weight)
             ) {
-
+            
                 lastLaneData[lane.team] = {
-
+            
                     odai: [...lane.odai],
+            
                     weight: [...lane.weight]
-
+            
                 };
-
+            
             }
-
+            
             const displayData =
                 lastLaneData[lane.team] || {
-
+            
                     odai: ["", "", ""],
+            
                     weight: [1, 1, 1]
-
+            
                 };
-
             // ==========================
-            // HTML生成
+            // レーン生成
             // ==========================
 
             const laneDiv =
@@ -185,32 +201,44 @@ async function updateDisplay() {
             // ==========================
 
             const odaiList =
-                laneDiv.querySelector(".odaiList");
+                laneDiv.querySelector(
+                    ".odaiList"
+                );
 
-            displayData.odai.forEach((text, index) => {
+            displayData.odai.forEach(
+                (text, index) => {
 
-                const span =
-                    document.createElement("span");
+                    const span =
+                        document.createElement(
+                            "span"
+                        );
 
-                span.textContent = text;
+                    span.textContent =
+                        text;
 
-                span.style.display = "block";
+                    span.style.display =
+                        "block";
 
-                span.style.color =
-                    getWeightColor(
-                        displayData.weight[index]
+                    span.style.color =
+                        getWeightColor(
+                            displayData.weight[index]
+                        );
+
+                    odaiList.appendChild(
+                        span
                     );
 
-                odaiList.appendChild(span);
-
-            });
+                }
+            );
 
             // ==========================
             // 得点色
             // ==========================
 
             const score =
-                laneDiv.querySelector(".score");
+                laneDiv.querySelector(
+                    ".score"
+                );
 
             score.classList.remove(
                 "low",
@@ -220,23 +248,33 @@ async function updateDisplay() {
 
             if (lane.score <= 500) {
 
-                score.classList.add("low");
+                score.classList.add(
+                    "low"
+                );
 
             }
 
-            else if (lane.score <= 1000) {
+            else if (
+                lane.score <= 1000
+            ) {
 
-                score.classList.add("middle");
+                score.classList.add(
+                    "middle"
+                );
 
             }
 
             else {
 
-                score.classList.add("high");
+                score.classList.add(
+                    "high"
+                );
 
             }
 
-            lanes.appendChild(laneDiv);
+            lanes.appendChild(
+                laneDiv
+            );
 
         });
 
@@ -244,13 +282,19 @@ async function updateDisplay() {
         // ランキング
         // ==========================
 
-        document.getElementById("scoreRank1").textContent =
+        document.getElementById(
+            "scoreRank1"
+        ).textContent =
             data.ranking[0] ?? "---";
 
-        document.getElementById("scoreRank2").textContent =
+        document.getElementById(
+            "scoreRank2"
+        ).textContent =
             data.ranking[1] ?? "---";
 
-        document.getElementById("scoreRank3").textContent =
+        document.getElementById(
+            "scoreRank3"
+        ).textContent =
             data.ranking[2] ?? "---";
 
     }
@@ -262,7 +306,6 @@ async function updateDisplay() {
     }
 
 }
-
 // =====================================
 // 定期更新開始
 // =====================================
