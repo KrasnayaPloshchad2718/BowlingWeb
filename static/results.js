@@ -113,13 +113,14 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 function parseParams() {
 
-    const p = new URLSearchParams(window.location.search);
+    // 「p」を「params」に変更
+    const params = new URLSearchParams(window.location.search);
 
-    const lane = p.get("lane");
-    const score = p.get("score");
+    const lane = params.get("lane");
+    const score = params.get("score");
 
     const odaiIndexes =
-        (p.get("odai") || "")
+        (params.get("odai") || "")
             .split(",")
             .map(Number);
     
@@ -139,9 +140,9 @@ function parseParams() {
     });
 
     const scores = [
-        p.get("sa"),
-        p.get("sb"),
-        p.get("sc")
+        params.get("sa"),
+        params.get("sb"),
+        params.get("sc")
     ];
 
     if (!lane || !score) return null;
