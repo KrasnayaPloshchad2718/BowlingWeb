@@ -1,70 +1,81 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-    <meta charset="UTF-8">
-    <title>BowlingWeb - Display</title>
-    <link rel="stylesheet" href="/static/display.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game UI</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <h1>BowlingWeb - Score Board</h1>
-
-    <!-- 接続状態 -->
-    <div id="status">未接続</div>
-    <nav class="display-nav">
-
-    <a href="/">抽選</a>
-
-    <a href="/display" class="active">スコア表示</a>
-
-    <a href="/rules">ルール</a>
-
-</nav>
-    <hr>
-
-    <!-- 4レーン表示 -->
-    <div id="lanes">
-
-        <div class="lane" id="lane1">
-            <h2>レーン1</h2>
-            <div class="team">チーム：</div>
-            <div class="odai">お題：</div>
-            <div class="score">スコア：</div>
-        </div>
-
-        <div class="lane" id="lane2">
-            <h2>レーン2</h2>
-            <div class="team">チーム：</div>
-            <div class="odai">お題：</div>
-            <div class="score">スコア：</div>
-        </div>
-
-        <div class="lane" id="lane3">
-            <h2>レーン3</h2>
-            <div class="team">チーム：</div>
-            <div class="odai">お題：</div>
-            <div class="score">スコア：</div>
-        </div>
-
-        <div class="lane" id="lane4">
-            <h2>レーン4</h2>
-            <div class="team">チーム：</div>
-            <div class="odai">お題：</div>
-            <div class="score">スコア：</div>
-        </div>
-
+  <!-- 上部：難易度バー（1つだけ） -->
+  <header class="top-bar">
+    <div class="difficulty">
+      <span>難易度</span>
+      <div class="bar">
+        <div class="fill" style="width: 50%;"></div>
+      </div>
     </div>
-    <div id="ScoreLank">
-        <h2>スコア</h2>
-        <div class="scoreRank" id="scoreRank1">1位：</div>
-        <div class="scoreRank" id="scoreRank2">2位：</div>
-        <div class="scoreRank" id="scoreRank3">3位：</div>
-    </div>
+  </header>
 
-    <script src="/static/display.js"></script>
+  <!-- メイン領域 -->
+  <main class="container">
+
+    <!-- レーンエリア -->
+    <section class="lanes">
+
+      <!-- レーン1 -->
+      <div class="lane-row">
+        <div class="lane lane-1">
+          <p>LANE 1</p>
+        </div>
+
+        <!-- レーン1の右：情報パネル -->
+        <aside class="lane-info">
+          <div class="panel">
+            <h3>レーン1情報</h3>
+            <p>スコア / 状態</p>
+          </div>
+        </aside>
+      </div>
+
+      <!-- レーン2 -->
+      <div class="lane-row">
+        <div class="lane lane-2">
+          <p>LANE 2</p>
+        </div>
+      </div>
+
+      <!-- レーン3 -->
+      <div class="lane-row">
+        <div class="lane lane-3">
+          <p>LANE 3</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 右側：ランキング（掲示板と分離） -->
+    <aside class="sidebar">
+      <div class="ranking">
+        <h2>ランキング</h2>
+        <ol>
+          <li>AAA - 9999</li>
+          <li>BBB - 8500</li>
+          <li>CCC - 7200</li>
+        </ol>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- 掲示板（ランキングとは別枠） -->
+  <footer class="board">
+    <h2>掲示板</h2>
+    <div class="board-content">
+      <p>ここにメッセージ</p>
+    </div>
+  </footer>
 
 </body>
-
 </html>
