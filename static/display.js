@@ -39,6 +39,7 @@ async function fetchScore() {
 
         const data =
             await response.json();
+        console.log("display/data =", data);
 
         laneData = data.lanes;
         rankingData = data.ranking;
