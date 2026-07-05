@@ -17,13 +17,66 @@ body {
 
 /* =========================
    navスペース確保
+============================
+
+/* =========================
+   ナビゲーション（追加対応）
 ========================= */
 
-#topNav {
+nav {
     height: 60px;
     width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+
     background: #0a0a0a;
     border-bottom: 1px solid #222;
+
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* navリンク */
+nav a {
+    color: #aaa;
+    text-decoration: none;
+    font-size: 14px;
+    letter-spacing: 1px;
+
+    padding: 8px 12px;
+    border-radius: 6px;
+
+    transition: 0.2s;
+}
+
+/* ホバー */
+nav a:hover {
+    color: white;
+    background: rgba(255,255,255,0.05);
+}
+
+/* アクティブ（現在ページ） */
+nav a.active {
+    color: #00ff66;
+    font-weight: bold;
+    border-bottom: 2px solid #00ff66;
+}
+
+/* =========================
+   nav分の余白調整
+========================= */
+
+#main {
+    margin-top: 10px;
+}
+
+/* body全体の圧迫防止 */
+body {
+    padding-top: 0;
 }
 
 /* =========================
