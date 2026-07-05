@@ -260,14 +260,18 @@ def get_news():
 @app.route("/upload", methods=["POST"])
 def upload_news():
     global current_news
+    
+    # フロントのJSから送られてくる生のテキストデータを取得
     uploaded_text = request.get_data(as_text=True)
+    
+    # 完全に上書き保存
     current_news = uploaded_text
     print("📢 ニュース原稿が更新されました。")
-    return jsonify({
-        "result": "ok",
-        "message": "News uploaded and overwritten successfully."
-    })
-
+    
+    # JavaScript側で .json() でパースできるように、正しいJSONレスポンスを返す
+    response = jsonify({"result": "ok", "message": "News updated successfully."})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
 
 # =========================
 # システム操作API（リセット）
