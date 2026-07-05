@@ -4,7 +4,7 @@
 // =====================================
 
 let laneData = [];
-
+const lastLaneData = {};
 
 // =====================================
 // 状態表示
@@ -105,121 +105,158 @@ function getWeightColor(weight){
 // 画面更新
 // =====================================
 
-function updateDisplay() {
+async function updateDisplay() {
 
-    // -------------------------
-    // 各レーン表示
-    // -------------------------
+    try {
 
-    for (let i = 0; i < 4; i++) {
+        const response = await fetch("/display/data");
 
-        const lane = laneData[i];
-
-        if (!lane) continue;
-
-        const laneDiv =
-            document.getElementById("lane" + (i + 1));
-
-        // チーム名
-        laneDiv.querySelector(".team").textContent =
-            "チーム：" + lane.team;
-
-        // お題
-        console.log(lane.weight);
-        const odaiList = laneDiv.querySelector(".odaiList");
-
-        if (
-            Array.isArray(lane.odai) &&
-            lane.odai.some(text => text !== "")
-        ) {
-        
-            const odaiHtml = lane.odai.map((text, i) => {
-        
-                const color = getWeightColor(lane.weight[i]);
-        
-                return `
-                    <span
-                        style="color:${color};display:block;"
-                    >
-                        ${text}
-                    </span>
-                `;
-        
-            }).join("");
-        
-            odaiList.innerHTML = odaiHtml;
-        
+        if (!response.ok) {
+            return;
         }
-        
-        }).join("");
-        
-        laneDiv.querySelector(".odai").innerHTML =
-            `
-            <span class="label">
-                お題：
-            </span>
-        
-            <span class="odaiList">
-                ${odaiHtml}
-            </span>
+
+        const data = await response.json();
+
+        const lanes = document.getElementById("lanes");
+
+        lanes.innerHTML = "";
+
+        data.lanes.forEach(lane => {
+
+            // ==========================
+            // 前回データ保持
+            // ==========================
+
+            if (
+                Array.isArray(lane.odai) &&
+                lane.odai.some(text => text !== "")
+            ) {
+
+                lastLaneData[lane.team] = {
+
+                    odai: [...lane.odai],
+                    weight: [...lane.weight]
+
+                };
+
+            }
+
+            const displayData =
+                lastLaneData[lane.team] || {
+
+                    odai: ["", "", ""],
+                    weight: [1, 1, 1]
+
+                };
+
+            // ==========================
+            // HTML生成
+            // ==========================
+
+            const laneDiv =
+                document.createElement("div");
+
+            laneDiv.className = "lane";
+
+            laneDiv.innerHTML = `
+
+                <h2>LANE ${lane.team}</h2>
+
+                <div class="odai">
+
+                    <span class="label">
+                        お題：
+                    </span>
+
+                    <span class="odaiList">
+                    </span>
+
+                </div>
+
+                <div class="score">
+                    ${lane.score}
+                </div>
+
             `;
 
-        // スコア
-        const scoreDiv =
-            laneDiv.querySelector(".score");
+            // ==========================
+            // お題表示
+            // ==========================
 
-        scoreDiv.textContent =
-            "スコア：" + lane.score;
+            const odaiList =
+                laneDiv.querySelector(".odaiList");
 
-        // 色クラスをリセット
-        scoreDiv.classList.remove(
-            "low",
-            "middle",
-            "high"
-        );
+            displayData.odai.forEach((text, index) => {
 
-        // スコアによって色を変更
-        if (lane.score <= 500) {
+                const span =
+                    document.createElement("span");
 
-            scoreDiv.classList.add("low");
+                span.textContent = text;
 
-        }
-        else if (lane.score <= 1000) {
+                span.style.display = "block";
 
-            scoreDiv.classList.add("middle");
+                span.style.color =
+                    getWeightColor(
+                        displayData.weight[index]
+                    );
 
-        }
-        else {
+                odaiList.appendChild(span);
 
-            scoreDiv.classList.add("high");
+            });
 
-        }
+            // ==========================
+            // 得点色
+            // ==========================
+
+            const score =
+                laneDiv.querySelector(".score");
+
+            score.classList.remove(
+                "low",
+                "middle",
+                "high"
+            );
+
+            if (lane.score <= 500) {
+
+                score.classList.add("low");
+
+            }
+
+            else if (lane.score <= 1000) {
+
+                score.classList.add("middle");
+
+            }
+
+            else {
+
+                score.classList.add("high");
+
+            }
+
+            lanes.appendChild(laneDiv);
+
+        });
+
+        // ==========================
+        // ランキング
+        // ==========================
+
+        document.getElementById("scoreRank1").textContent =
+            data.ranking[0] ?? "---";
+
+        document.getElementById("scoreRank2").textContent =
+            data.ranking[1] ?? "---";
+
+        document.getElementById("scoreRank3").textContent =
+            data.ranking[2] ?? "---";
 
     }
 
-    // -------------------------
-    // ランキング表示
-    // -------------------------
+    catch (e) {
 
-    for (let i = 0; i < 3; i++) {
-
-        const rankDiv =
-            document.getElementById(
-                "scoreRank" + (i + 1)
-            );
-
-        if (rankingData[i] !== undefined) {
-
-            rankDiv.textContent =
-                `${i + 1}位：${rankingData[i]}点`;
-
-        }
-        else {
-
-            rankDiv.textContent =
-                `${i + 1}位：`;
-
-        }
+        console.error(e);
 
     }
 
