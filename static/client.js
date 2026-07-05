@@ -246,13 +246,18 @@ document
 //QRとか
 //======================================
 
+// =====================================
+// QR生成（修正版：odaiは番号のみ）
+// =====================================
+
 function sendResult(total) {
 
     const lane =
         document.getElementById("team").value;
 
-    const odai =
-        currentIndexes.map(i => OdaiList[i]);
+    // 現在のodai番号（3つ）
+    const odaiIndexes =
+        currentIndexes.join(",");
 
     const scoreA =
         document.getElementById("scoreA").value;
@@ -266,12 +271,9 @@ function sendResult(total) {
     const params = new URLSearchParams({
 
         lane: lane,
-
         score: total,
 
-        oa: odai[0],
-        ob: odai[1],
-        oc: odai[2],
+        odai: odaiIndexes,   // ★ここが核心（文字排除）
 
         sa: scoreA,
         sb: scoreB,
@@ -292,17 +294,13 @@ function sendResult(total) {
     new QRCode(qr, {
 
         text: url,
-
         width: 180,
-
         height: 180
 
     });
 
-    console.log(url);
-
+    console.log("QR URL:", url);
 }
-
 // =====================================
 // 合計計算（お題ごとの独立計算・修正版）
 // =====================================
