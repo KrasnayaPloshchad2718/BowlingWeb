@@ -59,7 +59,9 @@ async function fetchScore() {
 
 //======================================
 function getWeightColor(weight){
-
+    if(weight == null){
+        weight = 1;
+    }
     const min = 1;
     const max = 8;
 
@@ -122,10 +124,7 @@ async function updateDisplay() {
         const data =
             await response.json();
 
-        console.log(
-            "display/data",
-            data
-        );
+        console.log("display/data =", data);
 
         const lanes =
             document.getElementById("lanes");
@@ -135,49 +134,75 @@ async function updateDisplay() {
         data.lanes.forEach(lane => {
 
             // ==========================
-            // お題・倍率・得点をセットで保持
+            // 初回作成
             // ==========================
+
             if (!lastLaneData[lane.team]) {
 
                 lastLaneData[lane.team] = {
-            
+
                     odai: ["", "", ""],
                     weight: null,
                     score: 0
-            
+
                 };
-            
+
             }
-            
-            // お題だけ更新
+
+            // ==========================
+            // お題更新
+            // ==========================
+
             if (
                 Array.isArray(lane.odai) &&
                 lane.odai.some(text => text !== "")
             ) {
-            
-                lastLaneData[lane.team].odai = [...lane.odai];
-            
+
+                lastLaneData[lane.team].odai =
+                    [...lane.odai];
+
             }
-            
-            // 倍率だけ更新
+
+            // ==========================
+            // 倍率更新
+            // ==========================
+
             if (
                 Array.isArray(lane.weight)
             ) {
-            
-                lastLaneData[lane.team].weight = [...lane.weight];
-            
+
+                lastLaneData[lane.team].weight =
+                    [...lane.weight];
+
             }
-            
-            // 得点だけ更新
+
+            // ==========================
+            // 得点更新
+            // ==========================
+
             if (
                 lane.score != null
             ) {
-            
-                lastLaneData[lane.team].score = lane.score;
-            
+
+                lastLaneData[lane.team].score =
+                    lane.score;
+
             }
-            
-            const displayData = lastLaneData[lane.team];
+
+            const displayData =
+                lastLaneData[lane.team];
+
+            console.log(
+                "displayData",
+                lane.team,
+                displayData
+            );
+
+            const weights =
+                Array.isArray(displayData.weight)
+                ? displayData.weight
+                : [1, 1, 1];
+
             // ==========================
             // レーン生成
             // ==========================
@@ -197,13 +222,12 @@ async function updateDisplay() {
                         お題：
                     </span>
 
-                    <span class="odaiList">
-                    </span>
+                    <span class="odaiList"></span>
 
                 </div>
 
                 <div class="score">
-                    スコア：${displayData.score ?? ""}
+                    スコア：${displayData.score}
                 </div>
 
             `;
@@ -213,17 +237,13 @@ async function updateDisplay() {
             // ==========================
 
             const odaiList =
-                laneDiv.querySelector(
-                    ".odaiList"
-                );
+                laneDiv.querySelector(".odaiList");
 
             displayData.odai.forEach(
                 (text, index) => {
 
                     const span =
-                        document.createElement(
-                            "span"
-                        );
+                        document.createElement("span");
 
                     span.textContent =
                         text;
@@ -233,12 +253,10 @@ async function updateDisplay() {
 
                     span.style.color =
                         getWeightColor(
-                            displayData.weight[index]
+                            weights[index]
                         );
 
-                    odaiList.appendChild(
-                        span
-                    );
+                    odaiList.appendChild(span);
 
                 }
             );
@@ -248,9 +266,7 @@ async function updateDisplay() {
             // ==========================
 
             const score =
-                laneDiv.querySelector(
-                    ".score"
-                );
+                laneDiv.querySelector(".score");
 
             score.classList.remove(
                 "low",
@@ -260,9 +276,7 @@ async function updateDisplay() {
 
             if (displayData.score <= 500) {
 
-                score.classList.add(
-                    "low"
-                );
+                score.classList.add("low");
 
             }
 
@@ -270,17 +284,13 @@ async function updateDisplay() {
                 displayData.score <= 1000
             ) {
 
-                score.classList.add(
-                    "middle"
-                );
+                score.classList.add("middle");
 
             }
 
             else {
 
-                score.classList.add(
-                    "high"
-                );
+                score.classList.add("high");
 
             }
 
@@ -294,19 +304,13 @@ async function updateDisplay() {
         // ランキング
         // ==========================
 
-        document.getElementById(
-            "scoreRank1"
-        ).textContent =
+        document.getElementById("scoreRank1").textContent =
             data.ranking[0] ?? "---";
 
-        document.getElementById(
-            "scoreRank2"
-        ).textContent =
+        document.getElementById("scoreRank2").textContent =
             data.ranking[1] ?? "---";
 
-        document.getElementById(
-            "scoreRank3"
-        ).textContent =
+        document.getElementById("scoreRank3").textContent =
             data.ranking[2] ?? "---";
 
     }
@@ -318,6 +322,7 @@ async function updateDisplay() {
     }
 
 }
+
 // =====================================
 // 定期更新開始
 // =====================================
