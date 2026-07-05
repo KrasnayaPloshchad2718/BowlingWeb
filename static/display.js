@@ -125,6 +125,7 @@ function updateDisplay() {
             "チーム：" + lane.team;
 
         // お題
+        console.log(lane.weight);
                 // お題
         const odaiHtml = lane.odai.map((text, i) => {
         
