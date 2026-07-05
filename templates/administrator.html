@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理者コントロールパネル</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/administrator.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='/administrator.css') }}">
 </head>
 <body>
 
@@ -33,6 +33,6 @@
         <a href="/logout" class="logout-link">🔒 ログアウト</a>
     </nav>
 
-    <script src="{{ url_for('static', filename='js/administrator.js') }}"></script>
+    <script src="{{ url_for('static', filename='/administrator.js') }}"></script>
 </body>
 </html>
