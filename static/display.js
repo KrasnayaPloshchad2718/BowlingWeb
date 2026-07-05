@@ -135,11 +135,7 @@ async function updateDisplay() {
         data.lanes.forEach(lane => {
 
             // ==========================
-            // お題と倍率をセットで保持
-            // ==========================
-
-            // ==========================
-            // お題と倍率をセットで保持
+            // お題・倍率・得点をセットで保持
             // ==========================
             
             if (
@@ -152,7 +148,9 @@ async function updateDisplay() {
             
                     odai: [...lane.odai],
             
-                    weight: [...lane.weight]
+                    weight: [...lane.weight],
+            
+                    score: lane.score
             
                 };
             
@@ -163,7 +161,9 @@ async function updateDisplay() {
             
                     odai: ["", "", ""],
             
-                    weight: [1, 1, 1]
+                    weight: [1, 1, 1],
+            
+                    score: 0
             
                 };
             // ==========================
