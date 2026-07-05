@@ -217,8 +217,6 @@ async function start() {
 
     }
 
-    // お題決定時に0点送信
-    //await sendScore(result, 0);
     const weights =
     currentIndexes.map(
         i => Number(ValueList[i])
@@ -230,31 +228,11 @@ async function start() {
         0,
         weights
     );
+
+    // ★ 計算ボタンを有効化する
+    document.getElementById("calcButton").disabled = false;
 }
 
-
-// =====================================
-// ボタン登録
-// =====================================
-
-document
-    .getElementById("startButton")
-    .addEventListener(
-        "click",
-        start
-    );
-
-// =====================================
-// 合計計算（前半）
-// =====================================
-
-// =====================================
-// 合計計算（Tkinter版と完全一致）
-// =====================================
-
-//======================================
-//QRとか
-//======================================
 
 // =====================================
 // QR生成（修正版：odaiは番号のみ）
@@ -311,6 +289,8 @@ function sendResult(total) {
 
     console.log("QR URL:", url);
 }
+
+
 // =====================================
 // 合計計算（お題ごとの独立計算・修正版）
 // =====================================
@@ -426,6 +406,9 @@ async function calcSum() {
     // JavaScriptの小数計算誤差を排除して整数化
     total = Math.round(total);
 
+    // ★ エラーなく計算が正常完了したため、計算ボタンを無効化する
+    document.getElementById("calcButton").disabled = true;
+
     // =========================
     // 表示・送信
     // =========================
@@ -436,7 +419,7 @@ async function calcSum() {
     const weights =
         currentIndexes.map(i => Number(ValueList[i]));
     
-    await sendScore(
+        await sendScore(
         odai,
         total,
         weights
@@ -446,12 +429,22 @@ async function calcSum() {
 
 
 // =====================================
-// 計算ボタン登録
+// ボタン登録と初期状態設定
 // =====================================
 
 document
-    .getElementById("calcButton")
+    .getElementById("startButton")
     .addEventListener(
         "click",
-        calcSum
+        start
     );
+
+const calcButton = document.getElementById("calcButton");
+
+calcButton.addEventListener(
+    "click",
+    calcSum
+);
+
+// ★ 画面起動時はまだ開始されていないので、計算ボタンをはじめから無効（グレーアウト）にしておく
+calcButton.disabled = true;
