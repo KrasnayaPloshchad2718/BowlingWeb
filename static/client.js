@@ -60,7 +60,11 @@ async function updateConfig() {
 // 得点送信
 // =====================================
 
-async function sendScore(odai, score) {
+async function sendScore(
+    odai,
+    score,
+    weight = [1,1,1]
+) {
 
     const team =
         Number(document.getElementById("team").value);
@@ -419,7 +423,15 @@ async function calcSum() {
     document.getElementById("total").textContent = "合計：" + total;
 
     const odai = currentIndexes.map(i => OdaiList[i]);
-    await sendScore(odai, total);
+
+    const weights =
+        currentIndexes.map(i => Number(ValueList[i]));
+    
+    await sendScore(
+        odai,
+        total,
+        weights
+    );
     sendResult(total);
 }
 
