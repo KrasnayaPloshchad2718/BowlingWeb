@@ -1,241 +1,214 @@
-/* =========================
-   全体基本（スクロールを徹底排除）
-========================= */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Arial", sans-serif;
+// =====================================
+// グローバル
+// =====================================
+
+let laneData = [];
+let rankingData = []; // ★ ここに「全期間の各レーンの最高スコア」を保持します
+const lastLaneData = {};
+
+// =====================================
+// 状態表示
+// =====================================
+
+function setStatus(text, color) {
+    const label = document.getElementById("status");
+    if (!label) return;
+    label.textContent = text;
+    label.style.color = color;
 }
 
-body {
-    background: #050505;
-    color: white;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* 画面外へのハミ出し（スクロールバー）を禁止 */
+// =====================================
+// サーバーから取得 (役割: データの取得と集計・保存)
+// =====================================
+
+async function fetchScore() {
+    try {
+        const response = await fetch("/display/data");
+
+        if (!response.ok) {
+            setStatus("取得失敗", "red");
+            return;
+        }
+
+        const data = await response.json();
+        console.log("display/data =", data);
+
+        laneData = data.lanes || [];
+
+        // ===================================================
+        // ★ 全期間のランキング集計ロジック
+        // ===================================================
+        laneData.forEach(lane => {
+            if (lane.team == null || lane.score == null) return;
+
+            // 既にランキングデータ（rankingData）にこのレーンがあるか探す
+            const existingRecord = rankingData.find(item => item.team === lane.team);
+
+            if (existingRecord) {
+                // 既に記録がある場合、今回のスコアがこれまでの最高スコアを上回っていたら更新
+                if (lane.score > existingRecord.score) {
+                    existingRecord.score = lane.score;
+                }
+            } else {
+                // 初めて登場したレーンの場合は、そのまま記録として追加
+                rankingData.push({
+                    team: lane.team,
+                    score: lane.score
+                });
+            }
+        });
+
+        // スコアが高い順（降順）に並び替える
+        rankingData.sort((a, b) => b.score - a.score);
+
+        // 引数としてデータを引き渡して画面を更新する
+        updateDisplay(laneData, rankingData);
+
+        setStatus("更新中", "green");
+
+    }
+    catch (e) {
+        console.error(e);
+        setStatus("接続エラー", "red");
+    }
 }
 
-/* =========================
-   ナビゲーション（高さを45pxにスリム化）
-========================= */
-nav {
-    height: 45px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 30px;
-    background: #0a0a0a;
-    border-bottom: 1px solid #222;
-    flex-shrink: 0;
+//======================================
+// 色の重み付け計算
+//======================================
+function getWeightColor(weight){
+    if(weight == null){
+        weight = 1;
+    }
+    const max = 8;
+
+    let t = Math.log(weight) / Math.log(max);
+    t = Math.max(0, Math.min(1, t));
+
+    let hue;
+    if(t < 0.75){
+        hue = 120 - 120 * (t / 0.75);
+    } else {
+        hue = 360 - 60 * ((t - 0.75) / 0.25);
+    }
+
+    return `hsl(${hue},100%,55%)`;
 }
 
-nav a {
-    color: #aaa;
-    text-decoration: none;
-    font-size: 13px;
-    letter-spacing: 1px;
-    padding: 4px 10px;
-    border-radius: 4px;
-    transition: 0.2s;
+// =====================================
+// 画面更新 (役割: 手元にあるデータをもとに描画する)
+// =====================================
+
+function updateDisplay(lanes, ranking) {
+    try {
+        const lanesContainer = document.getElementById("lanes");
+        if (!lanesContainer) return;
+        
+        lanesContainer.innerHTML = "";
+
+        lanes.forEach(lane => {
+
+            // 初回作成
+            if (!lastLaneData[lane.team]) {
+                lastLaneData[lane.team] = {
+                    odai: ["", "", ""],
+                    weight: null,
+                    score: 0
+                };
+            }
+
+            // お題更新
+            if (
+                Array.isArray(lane.odai) &&
+                lane.odai.some(text => text !== "")
+            ) {
+                lastLaneData[lane.team].odai = [...lane.odai];
+            }
+
+            // 倍率更新
+            if (Array.isArray(lane.weight)) {
+                lastLaneData[lane.team].weight = [...lane.weight];
+            }
+
+            // 得点更新
+            if (lane.score != null) {
+                lastLaneData[lane.team].score = lane.score;
+            }
+
+            const displayData = lastLaneData[lane.team];
+
+            console.log("displayData", lane.team, displayData);
+
+            const weights = Array.isArray(displayData.weight)
+                ? displayData.weight
+                : [1, 1, 1];
+
+            // レーン生成
+            const laneDiv = document.createElement("div");
+            laneDiv.className = "lane";
+            laneDiv.innerHTML = `
+                <h2>LANE ${lane.team}</h2>
+                <div class="odai">
+                    <span class="label">お題：</span>
+                    <span class="odaiList"></span>
+                </div>
+                <div class="score">
+                    スコア：${displayData.score}
+                </div>
+            `;
+
+            // お題表示
+            const odaiList = laneDiv.querySelector(".odaiList");
+            displayData.odai.forEach((text, index) => {
+                const span = document.createElement("span");
+                span.textContent = text;
+                span.style.display = "block";
+                span.style.color = getWeightColor(weights[index]);
+                odaiList.appendChild(span);
+            });
+
+            // 得点色
+            const scoreElement = laneDiv.querySelector(".score");
+            scoreElement.classList.remove("low", "middle", "high");
+
+            if (displayData.score <= 500) {
+                scoreElement.classList.add("low");
+            } else if (displayData.score <= 1000) {
+                scoreElement.classList.add("middle");
+            } else {
+                scoreElement.classList.add("high");
+            }
+
+            lanesContainer.appendChild(laneDiv);
+        });
+
+        // ==========================
+        // ランキング更新 (LANE名と最高スコアを表示)
+        // ==========================
+        const r1 = document.getElementById("scoreRank1");
+        const r2 = document.getElementById("scoreRank2");
+        const r3 = document.getElementById("scoreRank3");
+
+        if (r1) r1.textContent = ranking[0] ? `1st: LANE ${ranking[0].team} (${ranking[0].score})` : "1st: ---";
+        if (r2) r2.textContent = ranking[1] ? `2nd: LANE ${ranking[1].team} (${ranking[1].score})` : "2nd: ---";
+        if (r3) r3.textContent = ranking[2] ? `3rd: LANE ${ranking[2].team} (${ranking[2].score})` : "3rd: ---";
+
+    }
+    catch (e) {
+        console.error(e);
+    }
 }
 
-nav a:hover {
-    color: white;
-    background: rgba(255,255,255,0.05);
+// =====================================
+// 定期更新開始
+// =====================================
+
+function startDisplay() {
+    fetchScore();
+    setInterval(fetchScore, 3000);
 }
 
-nav a.active {
-    color: #00ff66;
-    font-weight: bold;
-    border-bottom: 2px solid #00ff66;
-}
-
-/* =========================
-   上部難易度バー（高さを24pxの極薄リボンに変更）
-========================= */
-#difficultyBar {
-    position: relative;
-    width: calc(100% - 32px);
-    max-width: 1200px;
-    height: 24px;
-    margin: 10px auto 4px auto;
-    border-radius: 4px;
-    overflow: hidden;
-    background: #111;
-    flex-shrink: 0;
-}
-
-#difficultyBar .grad {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, #00ff66 0%, #a000ff 100%);
-    opacity: 0.8;
-}
-
-#difficultyBar .label {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    font-weight: bold;
-    color: white;
-    font-size: 11px;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-    z-index: 2;
-}
-#difficultyBar .label.left { left: 15px; }
-#difficultyBar .label.right { right: 15px; }
-
-/* =========================
-   メインレイアウト（残りの縦幅を自動で分け合う）
-========================= */
-main {
-    flex: 1; /* ナビとフッターを除いた画面の余り縦幅をすべて使う */
-    display: flex;
-    gap: 16px;
-    padding: 8px 16px;
-    max-width: 1240px;
-    width: 100%;
-    margin: 0 auto;
-    min-height: 0; /* 子要素のoverflowインライン制御に必須 */
-}
-
-/* =========================
-   レーン表示エリア
-========================= */
-#lanes {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    min-height: 0;
-}
-
-/* 各レーン（縦に並んでも収まるよう高さをコンパクトに） */
-.lane {
-    flex: 1; /* 3〜4本あっても均等な高さで自動フィット */
-    display: flex;
-    justify-content: space-between;
-    align-items: center; /* 縦中央揃え */
-    background: #0b0b0b;
-    border: 1px solid #222;
-    border-radius: 8px;
-    padding: 10px 16px;
-    min-height: 0;
-}
-
-.lane-left {
-    flex: 1;
-    display: flex;
-    align-items: center; /* 横並びにして縦幅を節約 */
-    gap: 20px;
-}
-
-/* ==============================================
-   1. お題エリア全体のベースサイズを大きくする
-   ============================================== */
-.odai {
-    display: flex;
-    align-items: center;
-    font-size: 28px; /* 13px から 18px に拡大 */
-}
-
-/* 「お題:」というラベルの文字を少し控えめにする（お題本体を目立たせるため） */
-.odai .label {
-    color: #666; /* 少し暗めにしてメインテキストを引き立てる */
-    margin-right: 8px;
-    font-size: 14px; /* ラベルは少し小さめでOK */
-}
-
-/* ==============================================
-   2. お題同士の間隔を少し広げる（文字が大きくなった分のゆとり）
-   ============================================== */
-.odaiList {
-    display: flex;
-    gap: 18px; /* 12px から 18px に広げて視認性をアップ */
-    font-weight: bold; /* 太字にしてさらに見やすく */
-}
-
-/* ==============================================
-   3. 【お好みで】LANEの文字も負けないように微調整
-   ============================================== */
-.lane h2 {
-    font-size: 20px; /* 16px から 18px に変更 */
-    color: #00ff66;
-    min-width: 85px; /* 文字が大きくなった分、幅を少し確保 */
-}
-
-.odaiList span {
-    display: inline-block !important;
-}
-
-/* スコア（文字サイズを適正化） */
-.score {
-    font-size: 36px;
-    font-weight: bold;
-    font-family: monospace;
-    text-align: right;
-}
-
-.low { color: #4cff4c; }
-.middle { color: #ffd24c; }
-.high { color: #ff4c8b; }
-
-/* =========================
-   掲示板（レーンと高さを完全に合わせる）“
-========================= */
-#board {
-    flex: 1.2;
-    background: #0a0a0a;
-    border: 1px solid #222;
-    border-radius: 8px;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-}
-
-#board h2 {
-    font-size: 14px;
-    color: #aaa;
-    border-bottom: 1px solid #222;
-    padding-bottom: 4px;
-    margin-bottom: 8px;
-    flex-shrink: 0;
-}
-
-#boardContent {
-    flex: 1;
-    font-size: 13px;
-    line-height: 1.5;
-    color: #ccc;
-    overflow-y: auto; /* 万が一文字が溢れたら掲示板内だけスクロール */
-}
-
-/* =========================
-   ランキング（高さを40pxに固定）
-========================= */
-#ranking {
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background: #0a0a0a;
-    border-top: 1px solid #222;
-    height: 40px;
-    font-size: 13px;
-    flex-shrink: 0;
-}
-
-.rankBox {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-}
-
-#ranking .title {
-    font-weight: bold;
-    color: #666;
-    letter-spacing: 1px;
-}
+// =====================================
+// 起動
+// =====================================
+startDisplay();
