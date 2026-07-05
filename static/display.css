@@ -139,7 +139,7 @@ main {
 .odai {
     display: flex;
     align-items: center;
-    font-size: 25px; /* 13px から 18px に拡大 */
+    font-size: 32px; /* 13px から 18px に拡大 */
 }
 
 /* 「お題:」というラベルの文字を少し控えめにする（お題本体を目立たせるため） */
