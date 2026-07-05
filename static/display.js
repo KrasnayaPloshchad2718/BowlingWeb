@@ -203,7 +203,7 @@ async function updateDisplay() {
                 </div>
 
                 <div class="score">
-                    スコア：${displayData.score}
+                    スコア：${displayData.score ?? ""}
                 </div>
 
             `;
