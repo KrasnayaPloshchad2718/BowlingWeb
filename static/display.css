@@ -54,7 +54,7 @@ nav a.active {
 }
 
 /* =========================
-   上部難易度バー（高さを24pxの極薄リボンに変更）
+   上部難易度バー（★グラデーション修正箇所）
 ========================= */
 #difficultyBar {
     position: relative;
@@ -71,7 +71,8 @@ nav a.active {
 #difficultyBar .grad {
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, #00ff66 0%, #a000ff 100%);
+    /* 青を排除し、緑 → 黄色 → 赤 → 紫 に繋ぐグラデーション */
+    background: linear-gradient(90deg, #00ff66 0%, #ffea00 35%, #ff0055 70%, #b000ff 100%);
     opacity: 0.8;
 }
 
@@ -133,38 +134,32 @@ main {
     gap: 20px;
 }
 
-/* ==============================================
-   1. お題エリア全体のベースサイズを大きくする
-   ============================================== */
+/* お題エリア全体のベースサイズを大きくする */
 .odai {
     display: flex;
     align-items: center;
-    font-size: 32px; /* 13px から 18px に拡大 */
+    font-size: 32px;
 }
 
-/* 「お題:」というラベルの文字を少し控えめにする（お題本体を目立たせるため） */
+/* 「お題:」というラベルの文字を少し控えめにする */
 .odai .label {
-    color: #666; /* 少し暗めにしてメインテキストを引き立てる */
+    color: #666;
     margin-right: 8px;
-    font-size: 14px; /* ラベルは少し小さめでOK */
+    font-size: 14px;
 }
 
-/* ==============================================
-   2. お題同士の間隔を少し広げる（文字が大きくなった分のゆとり）
-   ============================================== */
+/* お題同士の間隔を少し広げる */
 .odaiList {
     display: flex;
-    gap: 18px; /* 12px から 18px に広げて視認性をアップ */
-    font-weight: bold; /* 太字にしてさらに見やすく */
+    gap: 18px;
+    font-weight: bold;
 }
 
-/* ==============================================
-   3. 【お好みで】LANEの文字も負けないように微調整
-   ============================================== */
+/* LANEの文字も負けないように微調整 */
 .lane h2 {
-    font-size: 22px; /* 16px から 18px に変更 */
+    font-size: 22px;
     color: #00ff66;
-    min-width: 85px; /* 文字が大きくなった分、幅を少し確保 */
+    min-width: 85px;
 }
 
 .odaiList span {
@@ -240,23 +235,22 @@ main {
     letter-spacing: 1px;
 }
 
-/* ==============================================
-   5. ニュース掲示板のスタイル
-   ============================================== */
+/* =========================
+   ニュース掲示板のスタイル
+========================= */
 .news-board {
     display: flex;
     align-items: center;
-    background: rgba(0, 0, 0, 0.6);        /* 背景を少し暗くして文字を引き立てる */
+    background: rgba(0, 0, 0, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 6px;
     padding: 10px 15px;
-    margin: 15px 0;                        /* 前後の余白 */
+    margin: 15px 0;
     font-family: monospace;
 }
 
-/* 「NEWS」という見出しラベル */
 .news-label {
-    background: #ff3b30;                   /* 目立つ赤色のアクセント */
+    background: #ff3b30;
     color: #fff;
     font-weight: bold;
     padding: 2px 8px;
@@ -266,12 +260,11 @@ main {
     letter-spacing: 1px;
 }
 
-/* サーバーから取得した文字を表示するエリア */
 .news-content {
     color: #ffffff;
-    font-size: 20px;                       /* お題(18px)より一回り大きくして目立たせる */
+    font-size: 20px;
     font-weight: bold;
-    white-space: pre-wrap;                 /* サーバー側で改行があればそのまま改行する */
+    white-space: pre-wrap;
     word-break: break-all;
     flex: 1;
 }
