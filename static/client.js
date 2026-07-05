@@ -63,7 +63,7 @@ async function updateConfig() {
 async function sendScore(
     odai,
     score,
-    weight = [1,1,1]
+    weight = null
 ) {
 
     const team =
