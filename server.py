@@ -1,3 +1,4 @@
+from datetime import timedelta  # ★セッション有効期限の設定用に追加
 from flask import (
     Flask,
     session,
@@ -6,7 +7,7 @@ from flask import (
     redirect,
     render_template,
     url_for,
-    Response  # プレーンテキスト返却用に追加
+    Response
 )
 
 # =========================
@@ -15,6 +16,9 @@ from flask import (
 
 app = Flask(__name__)
 app.secret_key = "適当な長いランダム文字列"  # 本番ではランダムなバイト列を推奨
+
+# ★ ログイン状態を持続させる設定（30日間）
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 
 HOST = "0.0.0.0"
 PORT = 5000
@@ -44,14 +48,12 @@ def load_config(filename=CONFIG_FILE):
     ValueList.clear()
 
     try:
-        # odai.txt は UTF-8 で保存してください
         with open(filename, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line == "" or "," not in line:
                     continue
-                # 行を「カンマ」で分割
-                odai, value = line.split(",", 1) # 1回だけ分割（お題自体にカンマが含まれる場合考慮）
+                odai, value = line.split(",", 1)
                 OdaiList.append(odai.strip())
                 ValueList.append(float(value.strip()))
     except FileNotFoundError:
@@ -69,24 +71,21 @@ load_config()
 
 LANE_COUNT = 4
 
-# 各チームの現在の状態をメモリに保持
 teams = {
     i: {
         "odai": ["", "", ""],
-        "weight": [1.0, 1.0, 1.0],  # Noneから初期値に変更
+        "weight": [1.0, 1.0, 1.0],
         "score": None
     }
     for i in range(1, LANE_COUNT + 1)
 }
 
-# スコアの履歴（ランキング用）
 score_history = []
 
 # =========================
-# 📢 【新規追加】掲示板（ニュース）管理
+# 掲示板（ニュース）管理
 # =========================
-# アップロードされたニュース原稿を保持する変数。
-# 新しい内容を受け取り次第、この変数を完全に上書きします。
+
 current_news = "現在、お知らせはありません。"
 
 # =========================
@@ -96,6 +95,9 @@ current_news = "現在、お知らせはありません。"
 @app.route("/")
 def login():
     """ログインページを表示"""
+    # すでにログイン済みの場合は、そのまま管理画面等へスキップさせる処理
+    if session.get("login"):
+        return redirect(url_for("administrator"))
     return render_template("login.html")
 
 
@@ -106,11 +108,30 @@ def login_post():
     password = request.form.get("password")
 
     if username == USERNAME and password == PASSWORD:
+        # ★ このセッションを永続的（Permanent）にすると宣言
+        session.permanent = True
         session["login"] = True
-        return redirect(url_for("client"))  # ログイン成功
+        
+        # ログイン成功後、新設した administrator ページへ遷移
+        return redirect(url_for("administrator"))
 
-    # 失敗したらリダイレクトページへ（またはログインページへ戻す）
+    # 失敗したらリダイレクトページへ
     return redirect(url_for("redirect_page"))
+
+
+@app.route("/logout")
+def logout():
+    """【任意使用】ログアウト処理"""
+    session.clear()
+    return redirect(url_for("login"))
+
+
+@app.route("/administrator")
+def administrator():
+    """🛠️ 【新規追加】管理者ページ（要ログイン）"""
+    if not session.get("login"):
+        return redirect(url_for("login"))
+    return render_template("administrator.html")
 
 
 @app.route("/client")
@@ -145,10 +166,6 @@ def redirect_page():
 
 @app.route("/results")
 def results_page():
-    """
-    指定されたレーンの結果を表示するページ。
-    URLパラメータからデータを受け取ります。
-    """
     return render_template(
         "results.html",
         lane=request.args.get("lane", ""),
@@ -167,7 +184,6 @@ def results_page():
 
 @app.route("/score", methods=["POST"])
 def score():
-    """クライアントからスコアデータを受信するAPI"""
     try:
         data = request.get_json()
     except Exception:
@@ -181,14 +197,12 @@ def score():
         if team not in teams:
             return jsonify({"result": "error", "message": "Invalid team ID"}), 400
 
-        # データを更新
         weights = data.get("weight", [1.0, 1.0, 1.0])
         teams[team]["odai"] = data["odai"]
         teams[team]["weight"] = weights
         current_score = int(data["score"])
         teams[team]["score"] = current_score
 
-        # スコアが0より大きい場合のみ、ランキング履歴に追加
         if current_score > 0:
             score_history.append(current_score)
 
@@ -202,8 +216,7 @@ def score():
 
 @app.route("/config")
 def config():
-    """現在のお題リストを取得するAPI"""
-    load_config()  # リクエストのたびにファイルを再読み込み（デバッグ用。本番では適宜調整）
+    load_config()
     return jsonify({
         "odai": OdaiList,
         "value": ValueList
@@ -212,13 +225,11 @@ def config():
 
 @app.route("/status")
 def status():
-    """全レーンの現在のステータス（内部用）を取得するAPI"""
     return jsonify(teams)
 
 
 @app.route("/display/data")
 def display_data():
-    """ディスプレイ表示用に整理されたデータを取得するAPI（3秒ごとのポーリング用）"""
     lanes = []
     for i in range(1, LANE_COUNT + 1):
         lanes.append({
@@ -228,7 +239,6 @@ def display_data():
             "score": teams[i]["score"]
         })
 
-    # スコア履歴を降順にソートして、上位3件を取得
     ranking = sorted(score_history, reverse=True)[:3]
 
     return jsonify({
@@ -238,43 +248,20 @@ def display_data():
 
 
 # =========================
-# 📢 【新規追加】掲示板（ニュース）API
+# 掲示板（ニュース）API
 # =========================
 
 @app.route("/news", methods=["GET"])
 def get_news():
-    """
-    保存されているニュース原稿を、そのままプレーンテキストで流すAPI。
-    ディスプレイ側は3秒ごとにここへアクセスします。
-    """
     global current_news
-    # HTMLではなく単なる「テキスト」として返すため、Responseオブジェクトを使用
-    # mimetype="text/plain" を指定するのがポイントです。
     return Response(current_news, mimetype="text/plain")
 
 
 @app.route("/upload", methods=["POST"])
 def upload_news():
-    """
-    新しいニュース原稿を受け取るAPI。
-    受け取った内容を保存し、古い内容はすべて上書きします。
-    """
     global current_news
-
-    # リクエストのBody全体をテキスト（生データ）として取得します。
-    # mimetypeがapplication/json等でなくても、テキストとして取得可能です。
-    # charsetを指定することで文字化けを防ぎます（デフォルトutf-8）。
     uploaded_text = request.get_data(as_text=True)
-
-    if not uploaded_text:
-        # 何もデータが届かなかった場合は、念のため空白にするなどの処理
-        # current_news = "" # 空白に上書きする場合
-        # return jsonify({"result": "error", "message": "No data received"}), 400
-        pass
-
-    # 受け取ったテキストでグローバル変数を完全に上書き
     current_news = uploaded_text
-
     print("📢 ニュース原稿が更新されました。")
     return jsonify({
         "result": "ok",
@@ -288,12 +275,10 @@ def upload_news():
 
 @app.route("/reset", methods=["POST"])
 def reset():
-    """ゲーム状態を初期化するAPI"""
     global teams
     global score_history
     global current_news
 
-    # 各レーンの状態をリセット
     teams = {
         i: {
             "odai": ["", "", ""],
@@ -302,11 +287,7 @@ def reset():
         }
         for i in range(1, LANE_COUNT + 1)
     }
-
-    # スコア履歴をクリア
     score_history.clear()
-
-    # ★ニュース原稿もリセット（初期メッセージに戻す）
     current_news = "現在、お知らせはありません。"
 
     print("🔄 システム状態がリセットされました。")
@@ -321,7 +302,6 @@ def reset():
 
 @app.route("/info")
 def info():
-    """サーバーの基本情報を取得するAPI"""
     return jsonify({
         "host": HOST,
         "port": PORT,
@@ -336,7 +316,6 @@ def info():
 
 @app.route("/test")
 def test():
-    """サーバーが生きているか確認するAPI"""
     return "OK"
 
 
@@ -346,7 +325,6 @@ def test():
 
 @app.errorhandler(404)
 def not_found(e):
-    """404 Not Found エラー時のレスポンス"""
     return jsonify({
         "result": "error",
         "message": "Not Found"
@@ -355,7 +333,6 @@ def not_found(e):
 
 @app.errorhandler(500)
 def internal_error(e):
-    """500 Internal Server Error 時のレスポンス"""
     return jsonify({
         "result": "error",
         "message": "Internal Server Error"
@@ -363,12 +340,10 @@ def internal_error(e):
 
 
 # =========================
-# メイン処理（ローカル起動時）
+# メイン処理
 # =========================
 
 if __name__ == "__main__":
-    # HOST, PORT は冒頭で定義されたものを使用
-    # debug=False で起動（本番環境の動作に近づけるため）
     app.run(
         host=HOST,
         port=PORT,
