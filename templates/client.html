@@ -33,23 +33,25 @@
 
     <hr>
 
-    <!-- お題 -->
-    <div>
-        <h2 id="A">A：</h2>
-        <input id="scoreA" type="number">
-        <button id="IsNotAchievedA" class="toggle-btn">お題未達成</button>
-    </div>
+    <!-- お題エリア（横並び構造化） -->
+    <div class="section">
+        <div class="odaiRow">
+            <h2 id="A">A：</h2>
+            <input id="scoreA" type="number" min="0" max="10">
+            <button id="IsNotAchievedA" class="toggle-btn">お題未達成</button>
+        </div>
 
-    <div>
-        <h2 id="B">B：</h2>
-        <input id="scoreB" type="number">
-        <button id="IsNotAchievedB" class="toggle-btn">お題未達成</button>
-    </div>
+        <div class="odaiRow">
+            <h2 id="B">B：</h2>
+            <input id="scoreB" type="number" min="0" max="10">
+            <button id="IsNotAchievedB" class="toggle-btn">お題未達成</button>
+        </div>
 
-    <div>
-        <h2 id="C">C：</h2>
-        <input id="scoreC" type="number">
-        <button id="IsNotAchievedC" class="toggle-btn">お題未達成</button>
+        <div class="odaiRow">
+            <h2 id="C">C：</h2>
+            <input id="scoreC" type="number" min="0" max="10">
+            <button id="IsNotAchievedC" class="toggle-btn">お題未達成</button>
+        </div>
     </div>
 
     <hr>
@@ -57,7 +59,7 @@
     <!-- 宣言 -->
     <div id="declareArea" style="display:none;">
         <h3>倒す本数を宣言</h3>
-        <input id="declare" type="number">
+        <input id="declare" type="number" min="0" max="10">
     </div>
 
     <hr>
@@ -69,7 +71,7 @@
 
     <hr>
 
-    <!-- ここが追加ポイント -->
+    <!-- QRコード表示 -->
     <div id="qr"></div>
 
     <hr>
@@ -85,6 +87,7 @@
     <!-- QRライブラリ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+    <!-- メインロジック -->
     <script src="/static/client.js"></script>
 
 </body>
