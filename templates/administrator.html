@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理者コントロールパネル</title>
+    <!-- CSSファイルの読み込み -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='/administrator.css') }}">
+</head>
+<body>
+
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>🛠️ 管理者コントロールパネル</h1>
+            <a href="/logout" class="logout-btn">ログアウト</a>
+        </header>
+
+        <main class="admin-main">
+            <!-- 掲示板・ニュース編集セクション -->
+            <section class="panel-section">
+                <h2>📢 掲示板（ニュース）の編集</h2>
+                <p class="section-desc">ここに配置した文字が、ディスプレイの掲示板エリアにそのまま同期・表示されます。</p>
+                
+                <div class="textarea-wrapper">
+                    <!-- 現在のニュースがここに自動で読み込まれます -->
+                    <textarea id="news-input" placeholder="ここにニュースを入力してください...（改行もそのまま反映されます）"></textarea>
+                </div>
+
+                <div class="action-row">
+                    <span id="status-message" class="status-message"></span>
+                    <button id="submit-news-btn" class="save-btn">掲示板を更新する</button>
+                </div>
+            </section>
+
+            <!-- 他のページへのクイックリンク（必要に応じて） -->
+            <section class="links-section">
+                <h3>クイックナビゲーション</h3>
+                <div class="link-grid">
+                    <a href="/client" class="nav-card">📱 チーム操作（Client）を開く</a>
+                    <a href="/display" target="_blank" class="nav-card">📺 メインディスプレイを開く</a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- JavaScriptファイルの読み込み -->
+    <script src="{{ url_for('static', filename='/administrator.js') }}"></script>
+</body>
+</html>
