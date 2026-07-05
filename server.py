@@ -281,7 +281,7 @@ def reset():
 
             "odai": ["", "", ""],
 
-            "weight":None
+            "weight":None,
             
             "score": None
 
