@@ -80,16 +80,17 @@ async function sendScore(
                 "Content-Type": "application/json"
 
             },
-
             body: JSON.stringify({
-
-                team: team,
-
-                odai: odai,
-
-                score: score
-
-            })
+        
+            team: team,
+        
+            odai: odai,
+        
+            weight: weight,
+        
+            score: score
+        
+        })
 
         });
 
