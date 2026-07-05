@@ -218,8 +218,18 @@ async function start() {
     }
 
     // お題決定時に0点送信
-    await sendScore(result, 0);
+    //await sendScore(result, 0);
+    const weights =
+    currentIndexes.map(
+        i => Number(ValueList[i])
+    );
 
+    // お題決定時に0点送信
+    await sendScore(
+        result,
+        0,
+        weights
+    );
 }
 
 
