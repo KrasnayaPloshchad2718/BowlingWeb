@@ -73,17 +73,12 @@ load_config()
 LANE_COUNT = 4
 
 teams = {
-
     i: {
-
         "odai": ["", "", ""],
-
+        "weight": [1, 1, 1],
         "score": 0
-
     }
-
     for i in range(1, LANE_COUNT + 1)
-
 }
 
 score_history = []
@@ -198,7 +193,11 @@ def score():
 
     teams[team]["odai"] = data["odai"]
 
+    teams[team]["weight"] = weights
+    
     teams[team]["score"] = int(data["score"])
+
+    weights = data.get("weight", [1, 1, 1])
 
     if int(data["score"]) > 0:
 
@@ -209,7 +208,7 @@ def score():
         "result": "ok"
 
     })
-    # =========================
+# =========================
 # API
 # =========================
 
@@ -245,6 +244,8 @@ def display_data():
             "team": i,
 
             "odai": teams[i]["odai"],
+
+            "weight": teams[i]["weight"],
 
             "score": teams[i]["score"]
 
