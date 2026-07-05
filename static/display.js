@@ -116,8 +116,8 @@ function updateDisplay(lanes, ranking, boardText) {
                     <div class="lane-left">
                         <h2>LANE ${lane.team}</h2>
                         <div class="odai">
-                            <span class="label">お題:</span>
-                            <span class="odaiList"></span>
+                            <h3><span class="label">お題:</span>
+                            <span class="odaiList"></span><h3>
                         </div>
                     </div>
                     <div class="score">
