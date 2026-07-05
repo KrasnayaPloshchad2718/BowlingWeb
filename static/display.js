@@ -116,18 +116,14 @@ function updateDisplay(lanes, ranking, boardText) {
                     <div class="lane-left">
                         <h2>LANE ${lane.team}</h2>
                         <div class="odai">
-                            <span class="label">お題：</span>
+                            <span class="label">お題:</span>
                             <span class="odaiList"></span>
                         </div>
-                        <div class="score">
-                            スコア：${displayData.score}
-                        </div>
                     </div>
-                    <div class="lane-right">
-                        <!-- 必要に応じて右側に設置するインジケータ等用のスペース -->
+                    <div class="score">
+                        ${displayData.score}
                     </div>
                 `;
-
                 // お題の個別追加（色反映）
                 const odaiList = laneDiv.querySelector(".odaiList");
                 displayData.odai.forEach((text, index) => {
