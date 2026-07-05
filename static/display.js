@@ -137,35 +137,47 @@ async function updateDisplay() {
             // ==========================
             // お題・倍率・得点をセットで保持
             // ==========================
-            
-            if (
-                Array.isArray(lane.odai) &&
-                lane.odai.some(text => text !== "") &&
-                Array.isArray(lane.weight)
-            ) {
-            
+            if (!lastLaneData[lane.team]) {
+
                 lastLaneData[lane.team] = {
             
-                    odai: [...lane.odai],
-            
-                    weight: [...lane.weight],
-            
-                    score: lane.score
+                    odai: ["", "", ""],
+                    weight: null,
+                    score: 0
             
                 };
             
             }
             
-            const displayData =
-                lastLaneData[lane.team] || {
+            // お題だけ更新
+            if (
+                Array.isArray(lane.odai) &&
+                lane.odai.some(text => text !== "")
+            ) {
             
-                    odai: ["", "", ""],
+                lastLaneData[lane.team].odai = [...lane.odai];
             
-                    weight: [1, 1, 1],
+            }
             
-                    score: 0
+            // 倍率だけ更新
+            if (
+                Array.isArray(lane.weight)
+            ) {
             
-                };
+                lastLaneData[lane.team].weight = [...lane.weight];
+            
+            }
+            
+            // 得点だけ更新
+            if (
+                lane.score != null
+            ) {
+            
+                lastLaneData[lane.team].score = lane.score;
+            
+            }
+            
+            const displayData = lastLaneData[lane.team];
             // ==========================
             // レーン生成
             // ==========================
