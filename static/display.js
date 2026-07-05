@@ -56,6 +56,51 @@ async function fetchScore() {
     }
 }
 
+//======================================
+function getWeightColor(weight){
+
+    const min = 1;
+    const max = 5;
+
+    let t =
+        Math.log(weight) /
+        Math.log(max);
+
+    t = Math.max(
+        0,
+        Math.min(1,t)
+    );
+
+    let hue;
+
+    if(t < 0.75){
+
+        hue =
+            120
+            -
+            120 *
+            (t / 0.75);
+
+    }
+
+    else{
+
+        hue =
+            360
+            -
+            60 *
+            (
+                (t - 0.75)
+                /
+                0.25
+            );
+
+    }
+
+    return `hsl(${hue},100%,55%)`;
+
+}
+
 // =====================================
 // 画面更新
 // =====================================
@@ -80,9 +125,34 @@ function updateDisplay() {
             "チーム：" + lane.team;
 
         // お題
+                // お題
+        const odaiHtml = lane.odai.map((text, i) => {
+        
+            const color =
+                getWeightColor(
+                    lane.weight[i]
+                );
+        
+            return `
+                <span
+                    style="color:${color};display:block;"
+                >
+                    ${text}
+                </span>
+            `;
+        
+        }).join("");
+        
         laneDiv.querySelector(".odai").innerHTML =
-            `<span class="label">お題：</span>
-             <span class="odaiList">${lane.odai.join("<br>")}</span>`;
+            `
+            <span class="label">
+                お題：
+            </span>
+        
+            <span class="odaiList">
+                ${odaiHtml}
+            </span>
+            `;
 
         // スコア
         const scoreDiv =
