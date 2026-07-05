@@ -126,21 +126,30 @@ function updateDisplay() {
 
         // お題
         console.log(lane.weight);
-                // お題
-        const odaiHtml = lane.odai.map((text, i) => {
+        const odaiList = laneDiv.querySelector(".odaiList");
+
+        if (
+            Array.isArray(lane.odai) &&
+            lane.odai.some(text => text !== "")
+        ) {
         
-            const color =
-                getWeightColor(
-                    lane.weight[i]
-                );
+            const odaiHtml = lane.odai.map((text, i) => {
         
-            return `
-                <span
-                    style="color:${color};display:block;"
-                >
-                    ${text}
-                </span>
-            `;
+                const color = getWeightColor(lane.weight[i]);
+        
+                return `
+                    <span
+                        style="color:${color};display:block;"
+                    >
+                        ${text}
+                    </span>
+                `;
+        
+            }).join("");
+        
+            odaiList.innerHTML = odaiHtml;
+        
+        }
         
         }).join("");
         
