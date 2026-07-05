@@ -1,9 +1,9 @@
-
 // =====================================
 // グローバル
 // =====================================
 
 let laneData = [];
+let rankingData = []; // ★ ここが未定義、または正しく使われていませんでした
 const lastLaneData = {};
 
 // =====================================
@@ -20,7 +20,7 @@ function setStatus(text, color) {
 }
 
 // =====================================
-// サーバーから取得
+// サーバーから取得 (役割: データの取得と保存)
 // =====================================
 
 async function fetchScore() {
@@ -41,17 +41,19 @@ async function fetchScore() {
             await response.json();
         console.log("display/data =", data);
 
+        // 手元のグローバル変数にしっかり保存
         laneData = data.lanes;
         rankingData = data.ranking;
 
-        updateDisplay();
+        // ★ 引数として手元のデータを引き渡して画面を更新する
+        updateDisplay(laneData, rankingData);
 
         setStatus("更新中", "green");
 
     }
 
     catch (e) {
-
+        console.error(e);
         setStatus("接続エラー", "red");
 
     }
@@ -105,33 +107,20 @@ function getWeightColor(weight){
 }
 
 // =====================================
-// 画面更新
+// 画面更新 (役割: 手元にあるデータをもとに描画するだけに変更)
 // =====================================
 
-async function updateDisplay() {
+function updateDisplay(lanes, ranking) { // ★ 引数を受け取るようにし、async を外しました
 
     try {
+        // ★ ここで再度 fetch していた不要な処理を丸ごと削除しました！
 
-        const response =
-            await fetch("/display/data");
-
-        if (!response.ok) {
-
-            return;
-
-        }
-
-        const data =
-            await response.json();
-
-        console.log("display/data =", data);
-
-        const lanes =
+        const lanesContainer =
             document.getElementById("lanes");
 
-        lanes.innerHTML = "";
+        lanesContainer.innerHTML = "";
 
-        data.lanes.forEach(lane => {
+        lanes.forEach(lane => {
 
             // ==========================
             // 初回作成
@@ -294,24 +283,24 @@ async function updateDisplay() {
 
             }
 
-            lanes.appendChild(
+            lanesContainer.appendChild(
                 laneDiv
             );
 
         });
 
         // ==========================
-        // ランキング
+        // ランキング (引数の ranking を使うように変更)
         // ==========================
 
         document.getElementById("scoreRank1").textContent =
-            "1st:" + (data.ranking[0] ?? "---");
+            "1st:" + (ranking[0] ?? "---");
 
         document.getElementById("scoreRank2").textContent =
-            "2nd:" + (data.ranking[1] ?? "---");
+            "2nd:" + (ranking[1] ?? "---");
 
         document.getElementById("scoreRank3").textContent =
-            "3rd:" + (data.ranking[2] ?? "---");
+            "3rd:" + (ranking[2] ?? "---");
 
     }
 
