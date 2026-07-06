@@ -198,6 +198,7 @@ function generateQR(total) {
 
 async function autoCalculate() {
     // そもそもお題が選ばれていなければスキップ
+    //const calculatedWeights = []; // ★追加：リアルタイム計算された倍率を格納するリスト
     if (!Array.isArray(currentIndexes) || currentIndexes.length !== 3) {
         return;
     }
@@ -258,12 +259,13 @@ async function autoCalculate() {
             const declared = Number(rawDeclared);
             if (isNaN(declared) || !Number.isInteger(declared) || declared < 0 || declared > 10) {
                 document.getElementById("total").textContent = "宣言エラー(0～10)";
-                calculatedWeights.push(0);
+                calculatedWeights.push(weight);
                 return;
             }
-
+            
             // 宣言通りのスコアならピン数に応じた特別倍率に昇格
             if (score === declared) {
+                calculatedWeights.push(0);
                 if (declared === 0) {
                     currentTotal += 10; // 0本宣言成功のボーナス
                     weight = 1;
@@ -279,10 +281,11 @@ async function autoCalculate() {
             }
         } else if (idx === 9 && isSkipped[key]) {
             weight = 1;
+            calculatedWeights.push(0);
         }
 
         // 決定した倍率をリストに格納
-        calculatedWeights.push(0);
+        //calculatedWeights.push(0);
 
         // 「個別スコア × 倍率」を途中合計に足す
         currentTotal += score * weight;
