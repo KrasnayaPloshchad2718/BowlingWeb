@@ -203,7 +203,7 @@ function updateDisplay(lanes, ranking) {
 }
 
 // =====================================
-// 掲示板（ニュース）データの取得と反映
+// 掲示板（ニュース）データの取得と反映（★改行で区切るように修正）
 // =====================================
 async function fetchNews() {
     try {
@@ -213,15 +213,54 @@ async function fetchNews() {
             return;
         }
         
-        // サーバーから届いた生テキストをそのまま取得
         const text = await response.text();
-        
         const newsContent = document.getElementById("news-content");
+        
         if (newsContent) {
-            newsContent.textContent = text; // そのまま表示（エスケープ安全）
+            newsContent.innerHTML = ""; // 一旦クリア
+
+            // 改行コード（Windows/Mac/Linux対応）で分割
+            const lines = text.split(/\r?\n/);
+
+            lines.forEach(line => {
+                // 空行はスキップ（お好みで削除してもOKです）
+                if (line.trim() === "") return;
+
+                // 1行ずつの塊（アイテム）としてdivを作成
+                const itemDiv = document.createElement("div");
+                itemDiv.className = "news-item"; // CSSでスタイリングできるようにクラスを付与
+                itemDiv.textContent = line;       // エスケープ安全にテキストを挿入
+
+                newsContent.appendChild(itemDiv);
+            });
         }
     } catch (e) {
         console.error("ニュース接続エラー:", e);
+    }
+}
+
+// =====================================
+// ★新機能: 株価データの取得と反映
+// =====================================
+async function fetchStock() {
+    try {
+        // ※ エンドポイントのパスやレスポンスの形式は、実際のサーバーの仕様に合わせて調整してください
+        const response = await fetch("/api/stock"); 
+        if (!response.ok) {
+            console.error("株価の取得に失敗しました");
+            return;
+        }
+
+        const data = await response.json();
+        const stockContent = document.getElementById("stock-content");
+
+        if (stockContent && data) {
+            // 例: サーバーから { price: 35000, change: "+150" } のようなJSONが返る想定
+            // ご自身のサーバーのデータ構造に合わせて書き換えてください
+            stockContent.textContent = `株価: ￥${data.price} (${data.change})`;
+        }
+    } catch (e) {
+        console.error("株価接続エラー:", e);
     }
 }
 
@@ -230,11 +269,16 @@ async function fetchNews() {
 // =====================================
 
 function startDisplay() {
+    // 初回実行
     fetchScore();
     fetchNews();
+    fetchStock(); // ★株価の初回取得
+
+    // 3秒ごとの定期ループ
     setInterval(() => {
         fetchScore();
         fetchNews();
+        fetchStock(); // ★株価の定期取得
     }, 3000);
 }
 
@@ -242,4 +286,3 @@ function startDisplay() {
 // 起動
 // =====================================
 startDisplay();
-    
