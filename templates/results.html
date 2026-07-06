@@ -2,19 +2,76 @@
 <html lang="ja">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bowling Result</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            background: #111;
+            color: white;
+            text-align: center;
+        }
 
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='results.css') }}">
+        /* 背景 */
+        .background-grid {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #5a0000, #111);
+            z-index: -1;
+        }
 
+        /* 
+           ココがポイント：Canvasとボタンを重ねるためのコンテナ
+           Canvasの実サイズ（1080x1350）ではなく、画面表示サイズ（W:1080px, H:1350px）に合わせる
+        */
+        .canvas-container {
+            position: relative;
+            width: 1080px;
+            height: 1350px;
+            margin: 20px auto;
+        }
+
+        #canvas {
+            display: block;
+            width: 1080px;
+            height: 1350px;
+        }
+
+        /* 
+           お題エリア（縦560px〜820px）の「真下」に重ねて配置するボタン
+        */
+        .instagram-share-zone {
+            position: absolute;
+            left: 50%;
+            top: 850px; /* お題枠の高さ(820px)の少し下に配置 */
+            transform: translateX(-50%);
+            width: 400px; /* 押しやすいサイズに横幅を調整 */
+            z-index: 10;
+        }
+
+        .instagram-share-zone button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            font-size: 24px;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px; /* 丸みを持たせてアメリカンダイナー風に */
+            cursor: pointer;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); /* インスタグラデーション */
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .instagram-share-zone button:hover {
+            transform: translateX(-50%) scale(1.03);
+            background: linear-gradient(45deg, #f39f47 0%, #e9744a 25%, #e03751 50%, #d13274 75%, #c32795 100%);
+        }
+    </style>
 </head>
 
 <body>
@@ -22,65 +79,315 @@
     <div class="background-grid"></div>
 
     <div class="container">
-        <div class="buttons">
-
-            <button
-                id="shareButton" onclick="shareImage()">
-
-                Instagramへ共有
-
-            </button>
-        </div>
+        <!-- Canvasの上に要素を重ねるコンテナ構造 -->
+        <div class="canvas-container">
+            <canvas id="canvas" width="1080" height="1350"></canvas>
             
-        <canvas
-            id="canvas"
-            width="1080"
-            height="1080">
-        </canvas>
-
-        
-        
-
+            <!-- インスタ共有ボタンをお題の下に絶対配置 -->
+            <div class="instagram-share-zone">
+                <button id="shareButton" onclick="shareImage()">Instagramへ共有</button>
+            </div>
+        </div>
     </div>
 
     <script>
-
         const resultData = {
-
             lane: "{{ lane }}",
-
             score: "{{ score }}",
-
             odai: [
-
                 "{{ odaiA|e }}",
-
                 "{{ odaiB|e }}",
-
                 "{{ odaiC|e }}"
-
             ],
-
             scores: [
-
                 "{{ scoreA }}",
-
                 "{{ scoreB }}",
-
                 "{{ scoreC }}"
-
             ]
-
         };
-
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+        // =====================================
+        // お題マスター
+        // =====================================
+        let OdaiList = [];
 
-    <script
-        src="{{ url_for('static', filename='results.js') }}">
+        async function loadConfig() {
+            try {
+                const response = await fetch("/config");
+                const data = await response.json();
+                OdaiList = data.odai;
+            } catch (e) {
+                console.error("Configの読み込みに失敗しました", e);
+            }
+        }
+
+        // =====================================
+        // 画像共有処理
+        // =====================================
+        async function shareImage() {
+            const canvas = document.getElementById("canvas");
+            canvas.toBlob(async (blob) => {
+                if (!blob) {
+                    alert("画像生成に失敗");
+                    return;
+                }
+
+                const file = new File([blob], "bowling-result.png", {
+                    type: "image/png"
+                });
+
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try {
+                        await navigator.share({
+                            title: "",
+                            text: "結果を共有します",
+                            files: [file]
+                        });
+                    } catch (err) {
+                        console.error(err);
+                    }
+                } else {
+                    alert("この端末は画像共有に対応していません。画像を長押しして保存してください。");
+                }
+            }, "image/png");
+        }
+
+        // ==========================
+        // 基本設定
+        // ==========================
+        const W = 1080;
+        const H = 1350;
+
+        let canvas;
+        let ctx;
+        let data = null;
+
+        // ==========================
+        // 初期化
+        // ==========================
+        window.addEventListener("DOMContentLoaded", async () => {
+            await loadConfig();
+
+            canvas = document.getElementById("canvas");
+            ctx = canvas.getContext("2d");
+
+            const dpr = 2;
+
+            canvas.width = W * dpr;
+            canvas.height = H * dpr;
+
+            canvas.style.width = W + "px";
+            canvas.style.height = H + "px";
+
+            ctx.scale(dpr, dpr);
+
+            data = parseParams();
+
+            if (!data) {
+                console.error("invalid url data");
+                return;
+            }
+
+            render();
+        });
+
+        // ==========================
+        // URL解析
+        // ==========================
+        function parseParams() {
+            const params = new URLSearchParams(window.location.search);
+            const lane = params.get("lane");
+            const score = params.get("score");
+
+            const odaiIndexes = (params.get("odai") || "").split(",").map(Number);
+            
+            const odai = odaiIndexes.map(index => {
+                if (index >= 0 && OdaiList && index < OdaiList.length) {
+                    return OdaiList[index];
+                }
+                return "不明のお題";
+            });
+
+            const scores = [
+                params.get("sa") || "0",
+                params.get("sb") || "0",
+                params.get("sc") || "0"
+            ];
+
+            if (!lane || !score) return null;
+
+            return { lane, score, odai, scores };
+        }
+
+        // ==========================
+        // 描画：背景
+        // ==========================
+        function drawBackground() {
+            const g = ctx.createLinearGradient(0, 0, 0, H);
+            g.addColorStop(0, "#120000");
+            g.addColorStop(0.5, "#050505");
+            g.addColorStop(1, "#000000");
+
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, W, H);
+        }
+
+        // ==========================
+        // 描画：ネオンタイトル
+        // ==========================
+        function drawTitle() {
+            const x = W / 2;
+            const y = 160;
+
+            ctx.textAlign = "center";
+            const text = "Zeze1-2お題deボウリング RESULT";
+
+            ctx.font = "bold 50px Arial";
+            ctx.shadowColor = "#ff0033";
+            ctx.shadowBlur = 40;
+            ctx.fillStyle = "#ff2b6d";
+            ctx.fillText(text, x, y);
+
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText(text, x, y);
+
+            ctx.strokeStyle = "#ff0044";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(x - 260, y + 20);
+            ctx.lineTo(x + 260, y + 20);
+            ctx.stroke();
+        }
+
+        // ==========================
+        // 描画：スコア表示
+        // ==========================
+        function drawScore() {
+            const x = W / 2;
+            ctx.textAlign = "center";
+
+            ctx.fillStyle = "#888";
+            ctx.font = "18px Arial";
+            ctx.fillText("LANE", x, 260);
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 54px Arial";
+            ctx.fillText(data.lane, x, 320);
+
+            ctx.fillStyle = "#888";
+            ctx.font = "18px Arial";
+            ctx.fillText("TOTAL", x, 400);
+
+            ctx.fillStyle = "#ff0033";
+            ctx.font = "bold 96px Arial";
+            ctx.shadowColor = "#ff0033";
+            ctx.shadowBlur = 25;
+            ctx.fillText(data.score, x, 500);
+
+            ctx.shadowBlur = 0;
+        }
+
+        // ==========================
+        // 描画：お題
+        // ==========================
+        function drawOdai() {
+            ctx.fillStyle = "rgba(0,0,0,0.6)";
+            ctx.fillRect(80, 560, 920, 260);
+
+            ctx.textAlign = "left";
+            ctx.fillStyle = "#fff";
+            ctx.font = "bold 26px Arial";
+            ctx.fillText("ODAI", 120, 610);
+
+            ctx.font = "22px Arial";
+
+            for (let i = 0; i < 3; i++) {
+                ctx.fillStyle = "#ffffff";
+                ctx.fillText(data.odai[i] || "", 120, 670 + i * 55);
+
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#ffd000";
+                ctx.fillText((data.scores[i] ?? "0") + "/10", 940, 670 + i * 55);
+                ctx.textAlign = "left";
+            }
+        }
+
+        // ==========================
+        // 描画：ダミー用ピン関数群（エラー防止用）
+        // ==========================
+        function drawPins() {
+            // 元のJavaScriptコードでrender()から呼び出されていたため、
+            // エラーで描画がストップしないように関数として空定義を確保しておきます。
+            // 必要に応じてここにピンの配置ロジック(drawSimplePinなど)を追加してください。
+        }
+
+        function drawSimplePin(x, y) {
+            ctx.save();
+            ctx.shadowColor = "rgba(0,0,0,0.5)";
+            ctx.shadowBlur = 8;
+
+            ctx.fillStyle = "#ffffff";
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+
+            ctx.beginPath();
+            ctx.ellipse(x + 20, y + 60, 18, 55, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "#cc0000";
+            ctx.fillRect(x + 5, y + 55, 30, 10);
+
+            ctx.beginPath();
+            ctx.arc(x + 20, y + 10, 18, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function roundRect(x, y, w, h, r, fill, stroke) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            if (fill) ctx.fill();
+            if (stroke) ctx.stroke();
+        }
+
+        // ==========================
+        // フッター
+        // ==========================
+        function drawFooter() {
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#444";
+            ctx.font = "16px Arial";
+            ctx.fillText("American Diner Bowling System", W / 2, H - 40);
+        }
+
+        // ==========================
+        // 最終描画統合
+        // ==========================
+        function render() {
+            drawBackground();
+            drawTitle();
+            drawScore();
+            drawOdai();
+            drawPins();
+            drawFooter();
+        }
     </script>
-
 </body>
 
 </html>
