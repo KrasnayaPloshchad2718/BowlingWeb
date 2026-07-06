@@ -3,7 +3,7 @@
 // =====================================
 
 let laneData = [];
-let rankingData = []; // ★ ここに「全期間の各レーンの最高スコア」を保持します
+let rankingData = []; // ★ 全期間の各レーンの最高スコアを保持
 const lastLaneData = {};
 
 // =====================================
@@ -33,7 +33,12 @@ async function fetchScore() {
         const data = await response.json();
         console.log("display/data =", data);
 
-        laneData = data.lanes || [];
+        // バックグラウンド復帰時などに不正なデータが来た場合の安全対策
+        if (!data || !Array.isArray(data.lanes) || data.lanes.length === 0) {
+            return;
+        }
+
+        laneData = data.lanes;
 
         // ===================================================
         // ★ 全期間のランキング集計ロジック
@@ -104,6 +109,9 @@ function getWeightColor(weight){
 
 function updateDisplay(lanes, ranking) {
     try {
+        // 引数が不正、または空配列だったら処理をスキップ（上書きバグ防止）
+        if (!lanes || lanes.length === 0) return;
+
         const lanesContainer = document.getElementById("lanes");
         if (!lanesContainer) return;
         
@@ -120,7 +128,7 @@ function updateDisplay(lanes, ranking) {
                 };
             }
 
-            // お題更新
+            // お題更新（有効な文字列が1つでもある場合のみキャッシュを更新）
             if (
                 Array.isArray(lane.odai) &&
                 lane.odai.some(text => text !== "")
@@ -128,8 +136,8 @@ function updateDisplay(lanes, ranking) {
                 lastLaneData[lane.team].odai = [...lane.odai];
             }
 
-            // 倍率更新
-            if (Array.isArray(lane.weight)) {
+            // 倍率更新（有効な配列データがある場合のみキャッシュを更新）
+            if (Array.isArray(lane.weight) && lane.weight.length > 0) {
                 lastLaneData[lane.team].weight = [...lane.weight];
             }
 
@@ -142,6 +150,7 @@ function updateDisplay(lanes, ranking) {
 
             console.log("displayData", lane.team, displayData);
 
+            // キャッシュ（lastLaneData）側も未取得(null)ならデフォルト[1,1,1]にする
             const weights = Array.isArray(displayData.weight)
                 ? displayData.weight
                 : [1, 1, 1];
@@ -166,7 +175,11 @@ function updateDisplay(lanes, ranking) {
                 const span = document.createElement("span");
                 span.textContent = text;
                 span.style.display = "block";
-                span.style.color = getWeightColor(weights[index]);
+                
+                // 対応するインデックスの重みデータがない場合の安全処理
+                const w = weights[index] !== undefined ? weights[index] : 1;
+                span.style.color = getWeightColor(w);
+                
                 odaiList.appendChild(span);
             });
 
@@ -203,7 +216,7 @@ function updateDisplay(lanes, ranking) {
 }
 
 // =====================================
-// 掲示板（ニュース）データの取得と反映（★改行で区切るように修正）
+// 掲示板（ニュース）データの取得と反映（★改行区切り＆消失バグ対策版）
 // =====================================
 async function fetchNews() {
     try {
@@ -213,23 +226,33 @@ async function fetchNews() {
             return;
         }
         
+        // サーバーから届いた生テキスト
         const text = await response.text();
-        const newsContent = document.getElementById("news-content");
         
+        // タブ復帰時などのエラーでデータが空、または空白文字だけなら更新せず現在の表示を維持
+        if (!text || text.trim() === "") {
+            return; 
+        }
+
+        const newsContent = document.getElementById("news-content");
         if (newsContent) {
-            newsContent.innerHTML = ""; // 一旦クリア
-
-            // 改行コード（Windows/Mac/Linux対応）で分割
+            // 改行コード（Windows/Mac/Linuxすべてに対応）で分割
             const lines = text.split(/\r?\n/);
+            
+            // 空行を除外した、実際に中身がある行だけの配列を作る
+            const validLines = lines.filter(line => line.trim() !== "");
+            
+            // 有効な行が1行もない場合は画面を書き換えない
+            if (validLines.length === 0) return;
 
-            lines.forEach(line => {
-                // 空行はスキップ（お好みで削除してもOKです）
-                if (line.trim() === "") return;
+            // 新しいデータが正しく存在することを確認してから要素をクリア
+            newsContent.innerHTML = "";
 
+            validLines.forEach(line => {
                 // 1行ずつの塊（アイテム）としてdivを作成
                 const itemDiv = document.createElement("div");
-                itemDiv.className = "news-item"; // CSSでスタイリングできるようにクラスを付与
-                itemDiv.textContent = line;       // エスケープ安全にテキストを挿入
+                itemDiv.className = "news-item"; // CSSスタイリング用
+                itemDiv.textContent = line;       // エスケープ安全に挿入
 
                 newsContent.appendChild(itemDiv);
             });
@@ -240,11 +263,11 @@ async function fetchNews() {
 }
 
 // =====================================
-// ★新機能: 株価データの取得と反映
+// ★ 新機能: 株価データの取得と反映（バグ対策版）
 // =====================================
 async function fetchStock() {
     try {
-        // ※ エンドポイントのパスやレスポンスの形式は、実際のサーバーの仕様に合わせて調整してください
+        // ※ 実際のサーバー側の仕様に合わせてエンドポイントのURLを変更してください
         const response = await fetch("/api/stock"); 
         if (!response.ok) {
             console.error("株価の取得に失敗しました");
@@ -252,12 +275,14 @@ async function fetchStock() {
         }
 
         const data = await response.json();
-        const stockContent = document.getElementById("stock-content");
+        
+        // データが破損している、または不完全な場合は処理をスキップ
+        if (!data || data.price == null) return;
 
-        if (stockContent && data) {
-            // 例: サーバーから { price: 35000, change: "+150" } のようなJSONが返る想定
-            // ご自身のサーバーのデータ構造に合わせて書き換えてください
-            stockContent.textContent = `株価: ￥${data.price} (${data.change})`;
+        const stockContent = document.getElementById("stock-content");
+        if (stockContent) {
+            // サーバーから { price: 35000, change: "+150" } のようなJSONが返る想定
+            stockContent.textContent = `株価: ￥${data.price} (${data.change || '±0'})`;
         }
     } catch (e) {
         console.error("株価接続エラー:", e);
@@ -272,13 +297,13 @@ function startDisplay() {
     // 初回実行
     fetchScore();
     fetchNews();
-    fetchStock(); // ★株価の初回取得
+    fetchStock();
 
     // 3秒ごとの定期ループ
     setInterval(() => {
         fetchScore();
         fetchNews();
-        fetchStock(); // ★株価の定期取得
+        fetchStock();
     }, 3000);
 }
 
