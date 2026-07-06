@@ -219,6 +219,7 @@ async function autoCalculate() {
         // スキップ（未達成）トグルが入っている場合
         if (isSkipped[key]) {
             score = 0;
+            calculatedweights.push(0);
             filledCount++; // 未達成チェック済みなの一枠としてカウント
         } 
         // 通常入力の場合
@@ -234,10 +235,12 @@ async function autoCalculate() {
             // 0～10の整数チェック
             if (isNaN(value) || !Number.isInteger(value) || value < 0 || value > 10) {
                 document.getElementById("total").textContent = "入力エラー(0～10)";
+                calculatedWeights.push(weight);
                 return;
             }
 
             score = value;
+            calculatedWeights.push(0);
             filledCount++; // 有効な数値が入っているのでカウント
         }
 
@@ -255,6 +258,7 @@ async function autoCalculate() {
             const declared = Number(rawDeclared);
             if (isNaN(declared) || !Number.isInteger(declared) || declared < 0 || declared > 10) {
                 document.getElementById("total").textContent = "宣言エラー(0～10)";
+                calculatedWeights.push(0);
                 return;
             }
 
@@ -278,7 +282,7 @@ async function autoCalculate() {
         }
 
         // 決定した倍率をリストに格納
-        calculatedWeights.push(weight);
+        calculatedWeights.push(0);
 
         // 「個別スコア × 倍率」を途中合計に足す
         currentTotal += score * weight;
