@@ -193,7 +193,7 @@ function generateQR(total) {
 
 
 // =====================================
-// ★コア修正：リアルタイム自動計算ロジック
+// ★修正：リアルタイム自動計算ロジック（weight送信修正版）
 // =====================================
 
 async function autoCalculate() {
@@ -205,6 +205,7 @@ async function autoCalculate() {
     const keys = ["A", "B", "C"];
     let currentTotal = 0;
     let filledCount = 0; // 有効な入力（または未達成）の数をカウント
+    const calculatedWeights = []; // ★追加：リアルタイム計算された倍率を格納するリスト
 
     // 1項目ずつ検証・計算
     for (let i = 0; i < 3; i++) {
@@ -224,7 +225,8 @@ async function autoCalculate() {
         else {
             const rawValue = box.value.trim();
             if (rawValue === "") {
-                // 入力欄がまだ空（null）ならこの項目は加算せず飛ばす
+                // 入力欄がまだ空（null）なら、初期設定の倍率を仮格納して飛ばす
+                calculatedWeights.push(weight);
                 continue;
             }
 
@@ -245,7 +247,8 @@ async function autoCalculate() {
             const rawDeclared = declareBox.value.trim();
 
             if (rawDeclared === "") {
-                // 宣言本数が未入力なら、インデックス9の計算のみ保留
+                // 宣言本数が未入力なら、初期倍率を仮格納して保留
+                calculatedWeights.push(weight);
                 continue;
             }
 
@@ -255,7 +258,6 @@ async function autoCalculate() {
                 return;
             }
 
-            // 宣言本数が入力されて初めてここがカウントされる
             // 宣言通りのスコアならピン数に応じた特別倍率に昇格
             if (score === declared) {
                 if (declared === 0) {
@@ -275,6 +277,9 @@ async function autoCalculate() {
             weight = 1;
         }
 
+        // 決定した倍率をリストに格納
+        calculatedWeights.push(weight);
+
         // 「個別スコア × 倍率」を途中合計に足す
         currentTotal += score * weight;
     }
@@ -286,11 +291,11 @@ async function autoCalculate() {
     // 画面の「合計：XX」表示を即座に更新
     document.getElementById("total").textContent = "現在の合計：" + currentTotal;
 
-    // 現在入っているデータ（倍率は既存キープのためnull指定）を即サーバーに送信
+    // ★修正：nullではなく、リアルタイムに計算した倍率リスト（calculatedWeights）を送信する
     const odai = currentIndexes.map(index => OdaiList[index]);
-    await sendScore(odai, currentTotal, null);
+    await sendScore(odai, currentTotal, calculatedWeights);
 
-    // ★ 3つの入力欄（未達成含む）がすべて埋まったら自動でQRコードを作成
+    // 3つの入力欄（未達成含む）がすべて埋まったら自動でQRコードを作成
     if (filledCount === 3) {
         // 特別お題(9)がある場合は、宣言欄も埋まっているか最終チェック
         if (currentIndexes.includes(9)) {
@@ -304,7 +309,6 @@ async function autoCalculate() {
         document.getElementById("qr").innerHTML = "";
     }
 }
-
 
 // =====================================
 // 未達成ボタンのトグルイベント
