@@ -82,6 +82,7 @@ function getWeightColor(weight){
     }
     if(weight == 0){
         return `hsl(0,0%,50%)`;
+    }
     const max = 8;
 
     let t = Math.log(weight) / Math.log(max);
@@ -241,3 +242,4 @@ function startDisplay() {
 // 起動
 // =====================================
 startDisplay();
+    
