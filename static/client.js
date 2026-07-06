@@ -41,7 +41,7 @@ async function updateConfig() {
 
 
 // =====================================
-// 得点送信
+// 得点送信（エラー修正版）
 // =====================================
 
 async function sendScore(odai, score, weight = null) {
@@ -57,12 +57,7 @@ async function sendScore(odai, score, weight = null) {
                 odai: odai,
                 weight: weight,
                 score: score
-            } = {
-                team: team,
-                odai: odai,
-                weight: weight,
-                score: score
-            })
+            }) // ← 余計な = { ... } を削除してスッキリ直しました
         });
 
         if (response.ok) {
@@ -73,10 +68,10 @@ async function sendScore(odai, score, weight = null) {
         }
     }
     catch (e) {
+        console.error(e); // ブラウザのコンソールに詳細なエラーを出す
         setStatus("接続できません", "red");
     }
 }
-
 
 // =====================================
 // 重複なし3個抽選
