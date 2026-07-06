@@ -7,7 +7,7 @@ let ValueList = [];
 
 let currentIndexes = [];
 
-// ★追加: 達成不可能（トグル状態）を管理するフラグ（trueで0点扱い）
+// 達成不可能（トグル状態）を管理するフラグ（trueで0点扱い）
 let isSkipped = { A: false, B: false, C: false };
 
 
@@ -57,6 +57,11 @@ async function sendScore(odai, score, weight = null) {
                 odai: odai,
                 weight: weight,
                 score: score
+            } = {
+                team: team,
+                odai: odai,
+                weight: weight,
+                score: score
             })
         });
 
@@ -102,7 +107,7 @@ function setStatus(text, color) {
 
 
 // =====================================
-// 開始
+// 開始（リセットと初期送信）
 // =====================================
 
 async function start() {
@@ -119,32 +124,29 @@ async function start() {
     document.getElementById("B").textContent = "B：" + result[1];
     document.getElementById("C").textContent = "C：" + result[2];
 
-    // 入力欄初期化
-    document.getElementById("scoreA").value = "";
-    document.getElementById("scoreB").value = "";
-    document.getElementById("scoreC").value = "";
-    
-    // 入力欄のdisabled状態も解除（★追加）
-    document.getElementById("scoreA").disabled = false;
-    document.getElementById("scoreB").disabled = false;
-    document.getElementById("scoreC").disabled = false;
+    // 入力欄初期化（すべて空、かつ有効化）
+    ["A", "B", "C"].forEach(key => {
+        const box = document.getElementById("score" + key);
+        box.value = "";
+        box.disabled = false;
+        
+        // 未達成ボタンも完全に有効化してリセット
+        isSkipped[key] = false;
+        const btn = document.getElementById("IsNotAchieved" + key);
+        if (btn) {
+            btn.disabled = false;
+            btn.style.background = "#00d4ff"; // 通常のサイバーブルー
+            btn.style.color = "#111";
+        }
+    });
 
     document.getElementById("declare").value = "";
     document.getElementById("total").textContent = "";
 
-    setStatus("未送信", "blue");
+    // QR表示エリアをリセット
+    document.getElementById("qr").innerHTML = "";
 
-    // ★追加: 達成不可能トグルの状態を初期化（通常状態に戻す）
-    const keys = ["A", "B", "C"];
-    keys.forEach(key => {
-        isSkipped[key] = false;
-        const btn = document.getElementById("IsNotAchieved" + key);
-        if (btn) {
-            btn.style.background = "#00d4ff"; // 元のサイバーブルー
-            btn.style.color = "#111";
-            btn.textContent = "未達成"; // テキスト表記（お好みで変更してください）
-        }
-    });
+    setStatus("未送信", "blue");
 
     // 「倒す本数を宣言」の表示切替
     if (currentIndexes.includes(9)) {
@@ -154,21 +156,17 @@ async function start() {
         document.getElementById("declareArea").style.display = "none";
     }
 
+    // 最初はお題決定時点の「0点」を送信
     const weights = currentIndexes.map(i => Number(ValueList[i]));
-
-    // お題決定時に0点送信
     await sendScore(result, 0, weights);
-
-    // ★ 計算ボタンを有効化する
-    document.getElementById("calcButton").disabled = false;
 }
 
 
 // =====================================
-// QR生成（修正版：odaiは番号のみ）
+// QR生成
 // =====================================
 
-function sendResult(total) {
+function generateQR(total) {
     const lane = document.getElementById("team").value;
     const odaiIndexes = currentIndexes.join(",");
 
@@ -187,7 +185,7 @@ function sendResult(total) {
 
     const url = window.location.origin + "/results?" + params.toString();
     const qr = document.getElementById("qr");
-    qr.innerHTML = "";
+    qr.innerHTML = ""; // 前のQRをクリア
 
     new QRCode(qr, {
         text: url,
@@ -195,107 +193,79 @@ function sendResult(total) {
         height: 180
     });
 
-    console.log("QR URL:", url);
+    console.log("QR Generated:", url);
 }
 
 
 // =====================================
-// 合計計算（お題ごとの独立計算・修正版）
+// ★コア修正：リアルタイム自動計算ロジック
 // =====================================
 
-async function calcSum() {
-    const usedWeights = [];
+async function autoCalculate() {
+    // そもそもお題が選ばれていなければスキップ
     if (!Array.isArray(currentIndexes) || currentIndexes.length !== 3) {
-        document.getElementById("total").textContent = "先に開始";
-        return;
-    }
-
-    if (!Array.isArray(ValueList) || ValueList.length === 0) {
-        console.error("ValueList異常:", ValueList);
         return;
     }
 
     const keys = ["A", "B", "C"];
-    const scores = [];
+    let currentTotal = 0;
+    let filledCount = 0; // 有効な入力（または未達成）の数をカウント
 
-    // =========================
-    // 入力取得とバリデーション
-    // =========================
+    // 1項目ずつ検証・計算
     for (let i = 0; i < 3; i++) {
         const key = keys[i];
-        const box = document.getElementById("score" + key);
-        if (!box) {
-            scores.push(0);
-            continue;
-        }
-
-        // ★修正: 達成不可能（有効時）は入力を無視して強制的に0点として扱う
-        if (isSkipped[key]) {
-            scores.push(0);
-            box.value = "0"; // 視覚的にも0にする
-            continue;
-        }
-
-        let rawValue = box.value.trim();
-        if (rawValue === "") {
-            document.getElementById("total").textContent = "入力エラー";
-            return;
-        }
-
-        let value = Number(rawValue);
-
-        if (isNaN(value) || !Number.isInteger(value)) {
-            document.getElementById("total").textContent = "入力エラー";
-            return;
-        }
-
-        if (value < 0 || value > 10) {
-            document.getElementById("total").textContent = "0～10を入力";
-            return;
-        }
-        scores.push(value);
-    }
-
-    let total = 0;
-
-    // =========================
-    // 計算本体（お題ごとに独立して計算）
-    // =========================
-    for (let i = 0; i < 3; i++) {
         const idx = currentIndexes[i];
-        if (idx === undefined) continue;
-
-        const score = scores[i];
+        const box = document.getElementById("score" + key);
+        
+        let score = 0;
         let weight = Number(ValueList?.[idx] ?? 0);
 
-        // もしこのお題が「倒す本数を宣言（インデックス 9）」だった場合
-        // ★修正: ただし、インデックス9が「達成不可能」になっていない場合のみ宣言チェックを行う
-        if (idx === 9 && !isSkipped[keys[i]]) {
+        // スキップ（未達成）トグルが入っている場合
+        if (isSkipped[key]) {
+            score = 0;
+            filledCount++; // 未達成チェック済みなの一枠としてカウント
+        } 
+        // 通常入力の場合
+        else {
+            const rawValue = box.value.trim();
+            if (rawValue === "") {
+                // 入力欄がまだ空（null）ならこの項目は加算せず飛ばす
+                continue;
+            }
+
+            const value = Number(rawValue);
+            // 0～10の整数チェック
+            if (isNaN(value) || !Number.isInteger(value) || value < 0 || value > 10) {
+                document.getElementById("total").textContent = "入力エラー(0～10)";
+                return;
+            }
+
+            score = value;
+            filledCount++; // 有効な数値が入っているのでカウント
+        }
+
+        // 特別お題「倒す本数を宣言(インデックス9)」の個別処理
+        if (idx === 9 && !isSkipped[key]) {
             const declareBox = document.getElementById("declare");
-            
-            if (!declareBox || declareBox.value.trim() === "") {
-                document.getElementById("total").textContent = "宣言本数を入力";
+            const rawDeclared = declareBox.value.trim();
+
+            if (rawDeclared === "") {
+                // 宣言本数が未入力なら、インデックス9の計算のみ保留
+                continue;
+            }
+
+            const declared = Number(rawDeclared);
+            if (isNaN(declared) || !Number.isInteger(declared) || declared < 0 || declared > 10) {
+                document.getElementById("total").textContent = "宣言エラー(0～10)";
                 return;
             }
 
-            let rawDeclared = declareBox.value.trim();
-            let declared = Number(rawDeclared);
-            
-            if (isNaN(declared) || !Number.isInteger(declared)) {
-                document.getElementById("total").textContent = "宣言本数は整数";
-                return;
-            }
-
-            if (declared < 0 || declared > 10) {
-                document.getElementById("total").textContent = "宣言本数は0～10";
-                return;
-            }
-
-            // 宣言と実際のスコアが一致した場合のみ、倍率（weight）を上書きする
+            // 宣言本数が入力されて初めてここがカウントされる
+            // 宣言通りのスコアならピン数に応じた特別倍率に昇格
             if (score === declared) {
                 if (declared === 0) {
-                    total += 10;
-                    weight = 1; 
+                    currentTotal += 10; // 0本宣言成功のボーナス
+                    weight = 1;
                 } else if (declared >= 1 && declared <= 6) {
                     weight = 3;
                 } else if (declared >= 7 && declared <= 9) {
@@ -304,86 +274,94 @@ async function calcSum() {
                     weight = 5;
                 }
             } else {
-                weight = 1;
+                weight = 1; // 宣言失敗時は等倍
             }
-        } else if (idx === 9 && isSkipped[keys[i]]) {
-            // インデックス9でかつ達成不可能が押されている場合は、一律で掛け算も0（スコア0 * 倍率1）
+        } else if (idx === 9 && isSkipped[key]) {
             weight = 1;
         }
 
-        // 各お題の「得点 × 倍率」を合計していく
-        total += score * weight;
+        // 「個別スコア × 倍率」を途中合計に足す
+        currentTotal += score * weight;
     }
 
-    // =========================
-    // 最終計算（最後に一律10倍）
-    // =========================
-    total *= 10;
-    total = Math.round(total);
+    // 最後に一律10倍
+    currentTotal *= 10;
+    currentTotal = Math.round(currentTotal);
 
-    // ★ 計算ボタンと達成不可能ボタンを一律無効化する（★修正）
-    document.getElementById("calcButton").disabled = true;
-    keys.forEach(key => {
-        const btn = document.getElementById("IsNotAchieved" + key);
-        if (btn) btn.disabled = true;
-    });
+    // 画面の「合計：XX」表示を即座に更新
+    document.getElementById("total").textContent = "現在の合計：" + currentTotal;
 
-    // =========================
-    // 表示・送信
-    // =========================
-    document.getElementById("total").textContent = "合計：" + total;
+    // 現在入っているデータ（倍率は既存キープのためnull指定）を即サーバーに送信
+    const odai = currentIndexes.map(index => OdaiList[index]);
+    await sendScore(odai, currentTotal, null);
 
-    const odai = currentIndexes.map(i => OdaiList[i]);
-    const weights = currentIndexes.map(i => Number(ValueList[i]));
-    
-    await sendScore(odai, total, weights);
-    sendResult(total);
+    // ★ 3つの入力欄（未達成含む）がすべて埋まったら自動でQRコードを作成
+    if (filledCount === 3) {
+        // 特別お題(9)がある場合は、宣言欄も埋まっているか最終チェック
+        if (currentIndexes.includes(9)) {
+            const decVal = document.getElementById("declare").value.trim();
+            if (decVal === "") return; // 宣言がまだならQRは出さない
+        }
+        generateQR(currentTotal);
+        document.getElementById("total").textContent = "確定合計：" + currentTotal;
+    } else {
+        // まだ埋まりきっていない場合は古いQRコードを隠す
+        document.getElementById("qr").innerHTML = "";
+    }
 }
 
 
 // =====================================
-// ★追加: 達成不可能ボタンのトグルイベント登録
+// 未達成ボタンのトグルイベント
 // =====================================
+
 function toggleAchieved(key) {
     const btn = document.getElementById("IsNotAchieved" + key);
     const box = document.getElementById("score" + key);
     if (!btn) return;
 
-    // トグル状態を反転
     isSkipped[key] = !isSkipped[key];
 
     if (isSkipped[key]) {
-        // 【有効（グレー）状態】
         btn.style.background = "#444"; // ダークグレー
         btn.style.color = "#888";
-        box.value = "0";             // 入力を0にする
-        box.disabled = true;         // 入力不可にする
+        box.value = "0";             // 視覚的にも0にする
+        box.disabled = true;         // 入力欄をロック
     } else {
-        // 【無効（通常ボタン）状態】
         btn.style.background = "#00d4ff"; // サイバーブルーに戻す
         btn.style.color = "#111";
-        box.value = "";              // 入力を空にして再入力を促す
-        box.disabled = false;        // 入力可能にする
+        box.value = "";              // 空欄に戻す
+        box.disabled = false;        // ロック解除
     }
+
+    // トグルが切り替わったら自動的にリアルタイム計算を走らせる
+    autoCalculate();
 }
 
-// A, B, Cそれぞれのボタンにイベントを設定
+
+// =====================================
+// イベントリスナーの登録
+// =====================================
+
+// 開始ボタン
+document.getElementById("startButton").addEventListener("click", start);
+
+// 3つの入力欄（scoreA, scoreB, scoreC）に入力されたら自動計算
 ["A", "B", "C"].forEach(key => {
+    document.getElementById("score" + key).addEventListener("input", autoCalculate);
+    
+    // 未達成ボタンのイベント登録
     const btn = document.getElementById("IsNotAchieved" + key);
     if (btn) {
         btn.addEventListener("click", () => toggleAchieved(key));
     }
 });
 
+// 宣言本数の入力欄に入力されたら自動計算
+document.getElementById("declare").addEventListener("input", autoCalculate);
 
-// =====================================
-// ボタン登録と初期状態設定
-// =====================================
-
-document.getElementById("startButton").addEventListener("click", start);
-
-const calcButton = document.getElementById("calcButton");
-calcButton.addEventListener("click", calcSum);
-
-// ★ 画面起動時はまだ開始されていないので、計算ボタンをはじめから無効化しておく
-calcButton.disabled = true;
+// （HTMLから不要になったボタン用コードの残骸があれば削除）
+const oldCalcButton = document.getElementById("calcButton");
+if (oldCalcButton) {
+    oldCalcButton.style.display = "none"; // HTMLに残っていても画面上で非表示にします
+}
