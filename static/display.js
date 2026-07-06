@@ -80,6 +80,8 @@ function getWeightColor(weight){
     if(weight == null){
         weight = 1;
     }
+    if(weight == 0){
+        return `hsl(0,0%,50%)`;
     const max = 8;
 
     let t = Math.log(weight) / Math.log(max);
