@@ -113,7 +113,7 @@ def login_post():
         session["login"] = True
         
         # ログイン成功後、新設した administrator ページへ遷移
-        return redirect(url_for("administrator.html"))
+        return redirect(url_for("administrator"))
 
     # 失敗したらリダイレクトページへ
     return redirect(url_for("redirect_page"))
