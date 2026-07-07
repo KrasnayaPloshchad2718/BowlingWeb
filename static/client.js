@@ -193,20 +193,19 @@ function generateQR(total) {
 
 
 // =====================================
-// ★修正：リアルタイム自動計算ロジック（weight送信修正版）
+// ★修正：リアルタイム自動計算ロジック（0点ロック対応版）
 // =====================================
 
 async function autoCalculate() {
     // そもそもお題が選ばれていなければスキップ
-    //const calculatedWeights = []; // ★追加：リアルタイム計算された倍率を格納するリスト
     if (!Array.isArray(currentIndexes) || currentIndexes.length !== 3) {
         return;
     }
 
     const keys = ["A", "B", "C"];
     let currentTotal = 0;
-    let filledCount = 0; // 有効な入力（または未達成）の数をカウント
-    const calculatedWeights = []; // ★追加：リアルタイム計算された倍率を格納するリスト
+    let filledCount = 0; // 有効な入力の数をカウント
+    const calculatedWeights = []; // リアルタイム計算された倍率を格納するリスト
 
     // 1項目ずつ検証・計算
     for (let i = 0; i < 3; i++) {
@@ -217,36 +216,26 @@ async function autoCalculate() {
         let score = 0;
         let weight = Number(ValueList?.[idx] ?? 0);
 
-        // スキップ（未達成）トグルが入っている場合
-        if (isSkipped[key]) {
-            score = 0;
-            calculatedweights.push(0);
-            filledCount++; // 未達成チェック済みなの一枠としてカウント
-        } 
-        // 通常入力の場合
-        else {
-            const rawValue = box.value.trim();
-            if (rawValue === "") {
-                // 入力欄がまだ空（null）なら、初期設定の倍率を仮格納して飛ばす
-                calculatedWeights.push(weight);
-                continue;
-            }
-
-            const value = Number(rawValue);
-            // 0～10の整数チェック
-            if (isNaN(value) || !Number.isInteger(value) || value < 0 || value > 10) {
-                document.getElementById("total").textContent = "入力エラー(0～10)";
-                calculatedWeights.push(weight);
-                return;
-            }
-
-            score = value;
-            calculatedWeights.push(0);
-            filledCount++; // 有効な数値が入っているのでカウント
+        const rawValue = box.value.trim();
+        
+        // 入力欄がまだ空（null）なら、初期設定の倍率を仮格納して飛ばす
+        if (rawValue === "") {
+            calculatedWeights.push(weight);
+            continue;
         }
 
+        const value = Number(rawValue);
+        // 0～10の整数チェック
+        if (isNaN(value) || !Number.isInteger(value) || value < 0 || value > 10) {
+            document.getElementById("total").textContent = "入力エラー(0～10)";
+            return;
+        }
+
+        score = value;
+        filledCount++; // 有効な数値（ボタンによる0含む）が入っているのでカウント
+
         // 特別お題「倒す本数を宣言(インデックス9)」の個別処理
-        if (idx === 9 && !isSkipped[key]) {
+        if (idx === 9) {
             const declareBox = document.getElementById("declare");
             const rawDeclared = declareBox.value.trim();
 
@@ -259,13 +248,11 @@ async function autoCalculate() {
             const declared = Number(rawDeclared);
             if (isNaN(declared) || !Number.isInteger(declared) || declared < 0 || declared > 10) {
                 document.getElementById("total").textContent = "宣言エラー(0～10)";
-                calculatedWeights.push(weight);
                 return;
             }
             
             // 宣言通りのスコアならピン数に応じた特別倍率に昇格
             if (score === declared) {
-                calculatedWeights.push(0);
                 if (declared === 0) {
                     currentTotal += 10; // 0本宣言成功のボーナス
                     weight = 1;
@@ -279,13 +266,10 @@ async function autoCalculate() {
             } else {
                 weight = 1; // 宣言失敗時は等倍
             }
-        } else if (idx === 9 && isSkipped[key]) {
-            weight = 1;
-            calculatedWeights.push(0);
         }
 
         // 決定した倍率をリストに格納
-        //calculatedWeights.push(0);
+        calculatedWeights.push(weight);
 
         // 「個別スコア × 倍率」を途中合計に足す
         currentTotal += score * weight;
@@ -298,11 +282,11 @@ async function autoCalculate() {
     // 画面の「合計：XX」表示を即座に更新
     document.getElementById("total").textContent = "現在の合計：" + currentTotal;
 
-    // ★修正：nullではなく、リアルタイムに計算した倍率リスト（calculatedWeights）を送信する
+    // リアルタイムに計算した倍率リスト（calculatedWeights）を送信する
     const odai = currentIndexes.map(index => OdaiList[index]);
     await sendScore(odai, currentTotal, calculatedWeights);
 
-    // 3つの入力欄（未達成含む）がすべて埋まったら自動でQRコードを作成
+    // 3つの入力欄がすべて埋まったら自動でQRコードを作成
     if (filledCount === 3) {
         // 特別お題(9)がある場合は、宣言欄も埋まっているか最終チェック
         if (currentIndexes.includes(9)) {
@@ -317,6 +301,33 @@ async function autoCalculate() {
     }
 }
 
+// =====================================
+// 0点ロックボタンのトグルイベント
+// =====================================
+
+function toggleAchieved(key) {
+    const btn = document.getElementById("IsNotAchieved" + key);
+    const box = document.getElementById("score" + key);
+    if (!btn) return;
+
+    // フラグを反転
+    isSkipped[key] = !isSkipped[key];
+
+    if (isSkipped[key]) {
+        btn.style.background = "#444";  // ダークグレー
+        btn.style.color = "#888";
+        box.value = "0";               // 強制的に「0」にする
+        box.disabled = true;           // 入力欄をロック
+    } else {
+        btn.style.background = "#00d4ff"; // サイバーブルーに戻す
+        btn.style.color = "#111";
+        box.value = "";                // 空欄に戻す
+        box.disabled = false;          // ロック解除
+    }
+
+    // 状態が変わったら自動的にリアルタイム計算を走らせる
+    autoCalculate();
+}
 // =====================================
 // 未達成ボタンのトグルイベント
 // =====================================
