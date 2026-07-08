@@ -74,21 +74,82 @@ async function sendScore(odai, score, weight = null) {
 }
 
 // =====================================
-// 重複なし3個抽選
+// ★追加：独自の出る重みリスト（出現確率）
+// =====================================
+// お題リスト（OdaiList）のインデックスと対応させて数値を設定します。
+// 例: 1つ目のお題の出る重みを「10」、2つ目を「5」、3つ目を「1（レア）」など。
+// ※設定されていないインデックス用には、デフォルト値（1.0）が適用される安全設計にしています。
+const CustomLotteryWeights = [
+    5,  // お題インデックス0 の出現重み（めちゃくちゃ出やすい）
+    5,  // お題インデックス1
+    5,   // お題インデックス2（普通の出やすさ）
+    5,   // お題インデックス3
+    5,   // お題インデックス4（レア）
+    5,   // お題インデックス5（レア）
+    5,
+    5,
+    5,
+    10,//10
+    5,
+    5,
+    5,
+    2,
+    3,
+    1
+    // 必要に応じて、登録されているお題の数だけ数値を並べてください
+];
+
+
+// =====================================
+// ★修正：独自重みベースの重複なし3個抽選
 // =====================================
 
 function decideN() {
     let result = [];
-    while (result.length < 3) {
-        const r = Math.floor(Math.random() * OdaiList.length);
-        if (!result.includes(r)) {
-            result.push(r);
+    
+    // 現在読み込まれているお題リストのインデックス（0, 1, 2...）を取得
+    let availableIndexes = OdaiList.map((_, index) => index);
+
+    // 3個選ぶまでループ
+    while (result.length < 3 && availableIndexes.length > 0) {
+        
+        // 1. 残っている選択肢の「独自重みの総和」を計算
+        let totalWeight = 0;
+        availableIndexes.forEach(idx => {
+            // もし独自の重みリストに設定がなければ、デフォルトの「1」として扱う
+            const weight = CustomLotteryWeights[idx] !== undefined ? CustomLotteryWeights[idx] : 1.0;
+            totalWeight += weight;
+        });
+
+        // 2. 0 から 総和 までのランダムな数（矢）を生成
+        let randomTarget = Math.random() * totalWeight;
+
+        // 3. ルーレットを回して、矢が刺さったインデックスを特定
+        let currentSum = 0;
+        let selectedIndex = availableIndexes[0];
+
+        for (let i = 0; i < availableIndexes.length; i++) {
+            const idx = availableIndexes[i];
+            const weight = CustomLotteryWeights[idx] !== undefined ? CustomLotteryWeights[idx] : 1.0;
+            currentSum += weight;
+            
+            if (randomTarget <= currentSum) {
+                selectedIndex = idx;
+                break;
+            }
         }
+
+        // 4. 当選したインデックスを結果に追加
+        result.push(selectedIndex);
+
+        // 5. 【重複防止】当選したインデックスを候補から除外
+        availableIndexes = availableIndexes.filter(idx => idx !== selectedIndex);
     }
+
+    // 最後にインデックスを昇順にソートして返す
     result.sort((a, b) => a - b);
     return result;
 }
-
 
 // =====================================
 // 状態表示
