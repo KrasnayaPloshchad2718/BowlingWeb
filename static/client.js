@@ -7,7 +7,7 @@ let ValueList = [];
 
 let currentIndexes = [];
 
-// 達成不可能（トグル状態）を管理するフラグ（trueで0点扱い）
+// 0点固定ロック状態（トグル状態）を管理するフラグ
 let isSkipped = { A: false, B: false, C: false };
 
 
@@ -41,7 +41,7 @@ async function updateConfig() {
 
 
 // =====================================
-// 得点送信（エラー修正版）
+// 得点送信
 // =====================================
 
 async function sendScore(odai, score, weight = null) {
@@ -57,7 +57,7 @@ async function sendScore(odai, score, weight = null) {
                 odai: odai,
                 weight: weight,
                 score: score
-            }) // ← 余計な = { ... } を削除してスッキリ直しました
+            })
         });
 
         if (response.ok) {
@@ -74,34 +74,32 @@ async function sendScore(odai, score, weight = null) {
 }
 
 // =====================================
-// ★追加：独自の出る重みリスト（出現確率）
+// 独自の出る重みリスト（出現確率）
 // =====================================
 // お題リスト（OdaiList）のインデックスと対応させて数値を設定します。
-// 例: 1つ目のお題の出る重みを「10」、2つ目を「5」、3つ目を「1（レア）」など。
-// ※設定されていないインデックス用には、デフォルト値（1.0）が適用される安全設計にしています。
+// 例: インデックス9（宣言お題）は「10」で出やすく、インデックス15は「1（レア）」
 const CustomLotteryWeights = [
-    5,  // お題インデックス0 の出現重み（めちゃくちゃ出やすい）
+    5,  // お題インデックス0
     5,  // お題インデックス1
-    5,   // お題インデックス2（普通の出やすさ）
-    5,   // お題インデックス3
-    5,   // お題インデックス4（レア）
-    5,   // お題インデックス5（レア）
-    5,
-    5,
-    5,
-    10,//10
-    5,
-    5,
-    5,
-    2,
-    3,
-    1
-    // 必要に応じて、登録されているお題の数だけ数値を並べてください
+    5,  // お題インデックス2
+    5,  // お題インデックス3
+    5,  // お題インデックス4
+    5,  // お題インデックス5
+    5,  // お題インデックス6
+    5,  // お題インデックス7
+    5,  // お題インデックス8
+    10, // お題インデックス9 (倒す本数を宣言)
+    5,  // お題インデックス10
+    5,  // お題インデックス11
+    5,  // お題インデックス12
+    2,  // お題インデックス13
+    3,  // お題インデックス14
+    1   // お題インデックス15
 ];
 
 
 // =====================================
-// ★修正：独自重みベースの重複なし3個抽選
+// 独自重みベースの重複なし3個抽選
 // =====================================
 
 function decideN() {
@@ -116,7 +114,6 @@ function decideN() {
         // 1. 残っている選択肢の「独自重みの総和」を計算
         let totalWeight = 0;
         availableIndexes.forEach(idx => {
-            // もし独自の重みリストに設定がなければ、デフォルトの「1」として扱う
             const weight = CustomLotteryWeights[idx] !== undefined ? CustomLotteryWeights[idx] : 1.0;
             totalWeight += weight;
         });
@@ -204,7 +201,7 @@ async function start() {
 
     setStatus("未送信", "blue");
 
-    // 「倒す本数を宣言」の表示切替
+    // 「倒す本数を宣言」の表示切替（インデックス9がある場合のみ表示）
     if (currentIndexes.includes(9)) {
         document.getElementById("declareArea").style.display = "block";
     }
@@ -254,7 +251,7 @@ function generateQR(total) {
 
 
 // =====================================
-// ★修正：リアルタイム自動計算ロジック（0点ロック対応版）
+// リアルタイム自動計算ロジック（0点ロック対応版）
 // =====================================
 
 async function autoCalculate() {
@@ -279,7 +276,7 @@ async function autoCalculate() {
 
         const rawValue = box.value.trim();
         
-        // 入力欄がまだ空（null）なら、初期設定の倍率を仮格納して飛ばす
+        // 入力欄がまだ空なら、初期設定の倍率を仮格納して飛ばす
         if (rawValue === "") {
             calculatedWeights.push(weight);
             continue;
@@ -362,6 +359,7 @@ async function autoCalculate() {
     }
 }
 
+
 // =====================================
 // 0点ロックボタンのトグルイベント
 // =====================================
@@ -389,32 +387,6 @@ function toggleAchieved(key) {
     // 状態が変わったら自動的にリアルタイム計算を走らせる
     autoCalculate();
 }
-// =====================================
-// 未達成ボタンのトグルイベント
-// =====================================
-
-function toggleAchieved(key) {
-    const btn = document.getElementById("IsNotAchieved" + key);
-    const box = document.getElementById("score" + key);
-    if (!btn) return;
-
-    isSkipped[key] = !isSkipped[key];
-
-    if (isSkipped[key]) {
-        btn.style.background = "#444"; // ダークグレー
-        btn.style.color = "#888";
-        box.value = "0";             // 視覚的にも0にする
-        box.disabled = true;         // 入力欄をロック
-    } else {
-        btn.style.background = "#00d4ff"; // サイバーブルーに戻す
-        btn.style.color = "#111";
-        box.value = "";              // 空欄に戻す
-        box.disabled = false;        // ロック解除
-    }
-
-    // トグルが切り替わったら自動的にリアルタイム計算を走らせる
-    autoCalculate();
-}
 
 
 // =====================================
@@ -428,7 +400,7 @@ document.getElementById("startButton").addEventListener("click", start);
 ["A", "B", "C"].forEach(key => {
     document.getElementById("score" + key).addEventListener("input", autoCalculate);
     
-    // 未達成ボタンのイベント登録
+    // ボタンのイベント登録（重複のない単一の関数を呼び出し）
     const btn = document.getElementById("IsNotAchieved" + key);
     if (btn) {
         btn.addEventListener("click", () => toggleAchieved(key));
@@ -438,8 +410,8 @@ document.getElementById("startButton").addEventListener("click", start);
 // 宣言本数の入力欄に入力されたら自動計算
 document.getElementById("declare").addEventListener("input", autoCalculate);
 
-// （HTMLから不要になったボタン用コードの残骸があれば削除）
+// （HTMLから不要になった旧ボタン用コードの非表示処理）
 const oldCalcButton = document.getElementById("calcButton");
 if (oldCalcButton) {
-    oldCalcButton.style.display = "none"; // HTMLに残っていても画面上で非表示にします
+    oldCalcButton.style.display = "none";
 }
